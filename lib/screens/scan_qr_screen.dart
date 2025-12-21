@@ -20,6 +20,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
     super.dispose();
   }
 
+  /// Callback when a barcode is detected by the scanner.
   void _handleBarcode(BarcodeCapture capture) {
     if (_isProcessing) return;
 
@@ -27,9 +28,10 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
     for (final barcode in barcodes) {
       if (barcode.rawValue != null) {
         final String rawValue = barcode.rawValue!;
+        // Check if the QR code is a valid TOTP URI
         if (rawValue.startsWith('otpauth://')) {
           _isProcessing = true;
-          // Stop scanning while processing
+          // Stop the camera immediately to prevent multiple reads
           controller.stop();
           
           _processUri(rawValue);
@@ -39,6 +41,8 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
     }
   }
 
+  /// Parses the 'otpauth://' URI to extract account details.
+  /// Expected format: otpauth://totp/Issuer:Account?secret=SECRET&issuer=Issuer
   void _processUri(String uriString) {
     try {
       final Uri uri = Uri.parse(uriString);
@@ -47,7 +51,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
       }
 
       final String path = uri.path;
-      // Path is usually /Issuer:AccountName or /AccountName
+      // The path usually contains the label (Issuer:Account or just Account)
       String name = path.startsWith('/') ? path.substring(1) : path;
       String issuer = '';
 
@@ -60,6 +64,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
       final String? secret = uri.queryParameters['secret'];
       final String? queryIssuer = uri.queryParameters['issuer'];
 
+      // Prefer the issuer from query parameters if available
       if (queryIssuer != null && queryIssuer.isNotEmpty) {
         issuer = queryIssuer;
       }
@@ -68,7 +73,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
         throw Exception('No secret found');
       }
 
-      // Add account
+      // Add the account to the provider
       Provider.of<AccountProvider>(context, listen: false)
           .addAccount(name, secret, issuer: issuer)
           .then((_) {
@@ -76,7 +81,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Added account: $name')),
           );
-          Navigator.of(context).pop(); // Return to previous screen
+          Navigator.of(context).pop(); // Return to previous screen (Home)
         }
       }).catchError((e) {
         _showError('Failed to add account: $e');
@@ -95,7 +100,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
     setState(() {
       _isProcessing = false;
     });
-    // Restart scanning
+    // Restart scanning if an error occurred
     controller.start();
   }
 

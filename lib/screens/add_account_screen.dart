@@ -26,6 +26,7 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
+      // Add the account manually using the input values
       Provider.of<AccountProvider>(context, listen: false).addAccount(
         _nameController.text,
         _secretController.text,
@@ -41,25 +42,17 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
       appBar: AppBar(
         title: const Text('Add Account'),
         actions: [
+          // Shortcut to switch to scanning mode if user changes their mind
           IconButton(
             icon: const Icon(Icons.qr_code_scanner),
             tooltip: 'Scan QR Code',
             onPressed: () async {
-              // Navigate to ScanQrScreen. If it adds an account successfully, it pops.
-              // We could also await a result if we wanted to pre-fill this form instead.
-              // For now, let's assume ScanQrScreen handles the addition directly.
               await Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const ScanQrScreen()),
               );
-              // If we returned and the user added an account, we might want to close this screen too,
-              // or just stay here. If the user successfully added an account in ScanQrScreen,
-              // ScanQrScreen pops itself. We can check if we should pop too, but it's fine to stay.
+              
               if (context.mounted && Provider.of<AccountProvider>(context, listen: false).accounts.isNotEmpty) {
-                 // Optional: Check if a new account was actually added recently? 
-                 // Or just let the user go back manually.
-                 // Let's just pop this screen if we want to go back to Home directly after a successful scan.
-                 // However, without a return value, it's hard to know.
-                 // Let's keep it simple: Stay here.
+                 // Logic handled in ScanQrScreen, but we could pop here if needed.
               }
             },
           ),
@@ -105,7 +98,7 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the secret key';
                   }
-                  // Basic regex check for Base32 could go here
+                  // TODO: Add strict Base32 validation regex if needed
                   return null;
                 },
               ),

@@ -13,6 +13,8 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Authenticator'),
+        // Display a progress bar at the bottom of the AppBar.
+        // This gives a visual indication of when the code will expire.
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4.0),
           child: Consumer<AccountProvider>(
@@ -21,6 +23,7 @@ class HomeScreen extends StatelessWidget {
                 value: provider.progress,
                 minHeight: 4.0,
                 backgroundColor: Colors.transparent,
+                // Change color to red when time is running out (< 20%).
                 valueColor: AlwaysStoppedAnimation<Color>(
                   provider.progress < 0.2 ? Colors.red : Theme.of(context).primaryColor,
                 ),
@@ -61,6 +64,7 @@ class HomeScreen extends StatelessWidget {
       floatingActionButton: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Button to open the QR Scanner
           FloatingActionButton.extended(
             heroTag: 'scan',
             onPressed: () {
@@ -72,6 +76,7 @@ class HomeScreen extends StatelessWidget {
             label: const Text('Scan'),
           ),
           const SizedBox(width: 16),
+          // Button to open the Manual Entry screen
           FloatingActionButton(
             heroTag: 'add',
             onPressed: () {

@@ -11,14 +11,17 @@ class AccountTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // We listen to the provider so this widget rebuilds every time the timer ticks (via notifyListeners),
+    // ensuring the code stays up-to-date.
     final provider = Provider.of<AccountProvider>(context);
     final code = provider.getCurrentCode(account.secret);
 
-    // Format code as XXX XXX
+    // Format code for readability (e.g., "123 456")
     final formattedCode = code.length == 6
         ? '${code.substring(0, 3)} ${code.substring(3)}'
         : code;
 
+    // Dismissible allows the user to swipe the tile to delete the account.
     return Dismissible(
       key: Key(account.id),
       background: Container(
@@ -29,6 +32,7 @@ class AccountTile extends StatelessWidget {
       ),
       direction: DismissDirection.endToStart,
       confirmDismiss: (direction) async {
+        // Show confirmation dialog before actual deletion to prevent accidents.
         return await showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -60,6 +64,7 @@ class AccountTile extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         elevation: 2,
         child: InkWell(
+          // Allow copying the code to clipboard on tap.
           onTap: () {
             Clipboard.setData(ClipboardData(text: code));
             ScaffoldMessenger.of(context).showSnackBar(
