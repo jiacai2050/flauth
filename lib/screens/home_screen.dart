@@ -4,6 +4,8 @@ import '../providers/account_provider.dart';
 import '../widgets/account_tile.dart';
 import 'add_account_screen.dart';
 import 'scan_qr_screen.dart';
+import 'import_export_screen.dart';
+import 'about_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -13,6 +15,26 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Authenticator'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.import_export),
+            tooltip: 'Import / Export',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const ImportExportScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            tooltip: 'About',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const AboutScreen()),
+              );
+            },
+          ),
+        ],
         // Display a progress bar at the bottom of the AppBar.
         // This gives a visual indication of when the code will expire.
         bottom: PreferredSize(

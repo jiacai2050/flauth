@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
+import '../models/account.dart';
 import '../providers/account_provider.dart';
 
 class ScanQrScreen extends StatefulWidget {
@@ -46,40 +47,15 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
   void _processUri(String uriString) {
     try {
       final Uri uri = Uri.parse(uriString);
-      if (uri.scheme != 'otpauth' || uri.host != 'totp') {
-         throw Exception('Invalid scheme or host');
-      }
-
-      final String path = uri.path;
-      // The path usually contains the label (Issuer:Account or just Account)
-      String name = path.startsWith('/') ? path.substring(1) : path;
-      String issuer = '';
-
-      if (name.contains(':')) {
-        final parts = name.split(':');
-        issuer = parts[0];
-        name = parts.sublist(1).join(':');
-      }
-
-      final String? secret = uri.queryParameters['secret'];
-      final String? queryIssuer = uri.queryParameters['issuer'];
-
-      // Prefer the issuer from query parameters if available
-      if (queryIssuer != null && queryIssuer.isNotEmpty) {
-        issuer = queryIssuer;
-      }
-
-      if (secret == null || secret.isEmpty) {
-        throw Exception('No secret found');
-      }
+      final account = Account.fromUri(uri);
 
       // Add the account to the provider
       Provider.of<AccountProvider>(context, listen: false)
-          .addAccount(name, secret, issuer: issuer)
+          .addAccountObject(account)
           .then((_) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Added account: $name')),
+            SnackBar(content: Text('Added account: ${account.name}')),
           );
           Navigator.of(context).pop(); // Return to previous screen (Home)
         }

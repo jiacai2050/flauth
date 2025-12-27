@@ -65,6 +65,45 @@ class AccountProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Adds an account directly (e.g. from URI parsing)
+  Future<void> addAccountObject(Account account) async {
+    _accounts.add(account);
+    await _storageService.saveAccounts(_accounts);
+    notifyListeners();
+  }
+
+  /// Exports all accounts to a newline-separated string of otpauth URIs.
+  String exportAccountsToText() {
+    return _accounts.map((a) => a.toUriString()).join('\n');
+  }
+
+  /// Imports accounts from a text string (one URI per line).
+  /// Returns the number of accounts successfully imported.
+  Future<int> importAccountsFromText(String text) async {
+    int count = 0;
+    final lines = text.split('\n');
+    for (var line in lines) {
+      if (line.trim().isEmpty) continue;
+      try {
+        final uri = Uri.parse(line.trim());
+        final account = Account.fromUri(uri);
+        // Check for duplicates based on secret to avoid double entry?
+        // For now, we allow duplicates or could check secret.
+        // Let's simple add.
+        _accounts.add(account);
+        count++;
+      } catch (e) {
+        // Skip invalid lines
+        debugPrint('Skipping invalid line: $line ($e)');
+      }
+    }
+    if (count > 0) {
+      await _storageService.saveAccounts(_accounts);
+      notifyListeners();
+    }
+    return count;
+  }
+
   /// Generates the current 6-digit TOTP code for a given secret.
   String getCurrentCode(String secret) {
     try {
