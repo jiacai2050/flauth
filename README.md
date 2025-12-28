@@ -70,6 +70,11 @@ To build on macOS, ensure you have set up a **Development Team** in Xcode for co
 - Keychain Sharing (Secure Storage)
 - User-Selected File Access (Local Backup)
 
+Run the following command to remove the quarantine attribute if you encounter issues when launching the app:
+```bash
+sudo xattr -rd com.apple.quarantine /Applications/Flauth.app
+```
+
 ## 🛡️ Permissions
 
 - **Camera**: To scan QR codes for adding accounts.
