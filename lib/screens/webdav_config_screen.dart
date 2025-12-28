@@ -55,35 +55,37 @@ class _WebDavConfigScreenState extends State<WebDavConfigScreen> {
       path = '/$path';
     }
 
-        try {
-          final basicAuth = 'Basic ${base64Encode(utf8.encode('$user:$pass'))}';
-          final uri = Uri.parse(url);
-          
-                // Use PROPFIND with Depth: 0 to check if the root (or URL) exists/is accessible
-                // This is a standard WebDAV check.
-                final client = http.Client();
-                final request = http.Request('PROPFIND', uri)
-                  ..headers['Authorization'] = basicAuth
-                  ..headers['Depth'] = '0';
-                  
-                final streamedResponse = await client.send(request);
-                final response = await http.Response.fromStream(streamedResponse);
-                client.close();
-          
-                if (response.statusCode >= 200 && response.statusCode < 300) {            if (mounted) {
-              final provider = Provider.of<AccountProvider>(context, listen: false);
-              await provider.saveWebDavConfig(url, user, pass, path);
-              
-              if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Connection successful & Saved!')),
-              );
-              Navigator.of(context).pop();
-            }
-          } else {
-            throw Exception('Server responded with status ${response.statusCode}');
-          }
-        } catch (e) {      if (mounted) {
+    try {
+      final basicAuth = 'Basic ${base64Encode(utf8.encode('$user:$pass'))}';
+      final uri = Uri.parse(url);
+
+      // Use PROPFIND with Depth: 0 to check if the root (or URL) exists/is accessible
+      // This is a standard WebDAV check.
+      final client = http.Client();
+      final request = http.Request('PROPFIND', uri)
+        ..headers['Authorization'] = basicAuth
+        ..headers['Depth'] = '0';
+
+      final streamedResponse = await client.send(request);
+      final response = await http.Response.fromStream(streamedResponse);
+      client.close();
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (mounted) {
+          final provider = Provider.of<AccountProvider>(context, listen: false);
+          await provider.saveWebDavConfig(url, user, pass, path);
+
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Connection successful & Saved!')),
+          );
+          Navigator.of(context).pop();
+        }
+      } else {
+        throw Exception('Server responded with status ${response.statusCode}');
+      }
+    } catch (e) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Connection failed: $e'),

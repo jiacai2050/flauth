@@ -39,7 +39,8 @@ class AccountTile extends StatelessWidget {
             return AlertDialog(
               title: const Text("Delete Account"),
               content: const Text(
-                  "Are you sure you want to delete this account? This cannot be undone."),
+                "Are you sure you want to delete this account? This cannot be undone.",
+              ),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
@@ -56,9 +57,9 @@ class AccountTile extends StatelessWidget {
       },
       onDismissed: (direction) {
         provider.deleteAccount(account.id);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${account.name} deleted')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('${account.name} deleted')));
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -87,8 +88,8 @@ class AccountTile extends StatelessWidget {
                           ? '${account.issuer} (${account.name})'
                           : account.name,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.grey[600],
-                          ),
+                        color: Colors.grey[600],
+                      ),
                     ),
                   ],
                 ),
@@ -98,7 +99,8 @@ class AccountTile extends StatelessWidget {
                   children: [
                     Text(
                       formattedCode,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
                             fontWeight: FontWeight.bold,
                             letterSpacing: 2,
                             color: Theme.of(context).colorScheme.primary,

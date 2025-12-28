@@ -1,59 +1,80 @@
 # Flauth 🔐
 
-Flauth 是一款使用 Flutter 开发的开源 TOTP（基于时间的一次性密码）身份验证器。它旨在提供一个简洁、安全且轻量级的 2FA（双重身份验证）管理方案。
+[中文说明](./README_zh.md)
 
-## ✨ 功能特性
+Flauth is a secure, open-source TOTP (Time-based One-Time Password) authenticator built with Flutter. It provides a simple, beautiful, and lightweight solution for managing your 2FA (Two-Factor Authentication) tokens.
 
-- **动态验证码**：生成标准的 6 位 TOTP 验证码，每 30 秒自动刷新。
-- **扫码添加**：支持扫描 `otpauth://` 标准二维码快速添加账号。
-- **手动添加**：支持手动输入密钥信息。
-- **安全存储**：使用 `flutter_secure_storage` 将密钥加密存储在设备的 Secure Enclave (iOS/macOS) 或 Keystore (Android) 中。
-- **实时进度条**：直观展示验证码剩余有效时间。
-- **便捷操作**：
-  - **点击复制**：点击验证码即可快速复制。
-  - **滑动删除**：支持左滑删除账号并带有二次确认。
-- **主题适配**：完美适配系统的深色/浅色模式。
+## 🌟 Why Flauth?
 
-## 🛠️ 技术栈
+- **100% Open Source**: Transparent and trustable code. Your secrets never leave your device unless you choose to sync them.
+- **Flexible Backups**:
+  - **Local Backup**: Export/Import accounts as standard text files using system file pickers.
+  - **WebDAV Sync**: Seamlessly sync your data with your private cloud (Nextcloud, Nutstore, etc.) using a robust single-file sync approach with custom path support.
+- **Privacy & Security**:
+  - **Encrypted Storage**: Secrets are encrypted and stored in the device's secure element (Keychain on iOS/macOS, Keystore on Android).
+  - **Granular Storage**: Implements "One Key Per Account" architecture for maximum reliability and scalability.
+- **Modern UI**: Focused on simplicity. Built with Material 3, supporting adaptive light and dark modes.
 
-- **Flutter & Dart**
-- **[Provider](https://pub.dev/packages/provider)**: 状态管理。
-- **[OTP](https://pub.dev/packages/otp)**: 核心算法实现。
-- **[Flutter Secure Storage](https://pub.dev/packages/flutter_secure_storage)**: 安全数据持久化。
-- **[Mobile Scanner](https://pub.dev/packages/mobile_scanner)**: 二维码识别。
+## ✨ Features
 
-## 🚀 快速开始
+- **TOTP Generation**: Standard 6-digit codes refreshing every 30 seconds.
+- **QR Code Scanner**: Quickly add accounts by scanning standard `otpauth://` QR codes.
+- **Live Progress**: Visual timer indicating code expiration.
+- **Deduplication**: Intelligent duplicate check based on secret keys to prevent account bloat.
+- **Easy Management**: Tap to copy, swipe to delete with confirmation.
 
-### 前置条件
-- 已安装 [Flutter SDK](https://docs.flutter.dev/get-started/install)
-- 对应的开发环境 (Android Studio / Xcode)
+![](assets/account-empty.png)
+![](assets/backup-local.png)
+![](assets/backup-webdav.png)
+![](assets/account-two.png)
 
-### 安装步骤
+## 🛠️ Tech Stack
 
-1. 克隆并进入项目目录：
+- **Framework**: Flutter & Dart
+- **State Management**: [Provider](https://pub.dev/packages/provider)
+- **Core Logic**: [OTP](https://pub.dev/packages/otp)
+- **Security**: [Flutter Secure Storage](https://pub.dev/packages/flutter_secure_storage)
+- **Scanner**: [Mobile Scanner](https://pub.dev/packages/mobile_scanner)
+- **Networking**: Standard [http](https://pub.dev/packages/http) for lightweight WebDAV.
+
+## 🚀 Getting Started
+
+### Prerequisites
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) installed.
+- Appropriate development environment (Xcode for iOS/macOS, Android Studio for Android).
+
+### Installation
+
+1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/jiacai2050/flauth.git
    cd flauth
    ```
 
-2. 安装依赖：
+2. Install dependencies:
    ```bash
    flutter pub get
    ```
 
-3. 运行应用：
+3. Run the application:
    ```bash
    flutter run
    ```
 
-## 📸 应用截图
-*(这里可以放置应用运行时的截图)*
+## 🏗️ Platform Specifics
 
-## 🛡️ 权限说明
+### macOS
+To build on macOS, ensure you have set up a **Development Team** in Xcode for code signing (required for Keychain access in Sandbox). The app includes entitlements for:
+- Network Client (WebDAV)
+- Camera (Scanning)
+- Keychain Sharing (Secure Storage)
+- User-Selected File Access (Local Backup)
 
-- **相机**：用于扫描二维码添加账号。
-- **存储**：用于加密保存您的账号密钥。
+## 🛡️ Permissions
 
-## 📄 开源协议
+- **Camera**: To scan QR codes for adding accounts.
+- **Local Storage/Network**: To backup/restore accounts locally or via WebDAV.
 
-本项目采用 MIT 协议。
+## 📄 License
+
+This project is licensed under the [MIT License](https://liujiacai.net/license/MIT).

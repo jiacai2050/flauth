@@ -34,7 +34,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
           _isProcessing = true;
           // Stop the camera immediately to prevent multiple reads
           controller.stop();
-          
+
           _processUri(rawValue);
           break;
         }
@@ -53,27 +53,27 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
       Provider.of<AccountProvider>(context, listen: false)
           .addAccountObject(account)
           .then((success) {
-        if (mounted) {
-          if (success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Added account: ${account.name}')),
-            );
-            Navigator.of(context).pop(); // Return to previous screen (Home)
-          } else {
-             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Account already exists: ${account.name}'),
-                backgroundColor: Colors.orange,
-              ),
-            );
-            // Optionally pop or let user scan another
-             Navigator.of(context).pop();
-          }
-        }
-      }).catchError((e) {
-        _showError('Failed to add account: $e');
-      });
-
+            if (mounted) {
+              if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Added account: ${account.name}')),
+                );
+                Navigator.of(context).pop(); // Return to previous screen (Home)
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Account already exists: ${account.name}'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+                // Optionally pop or let user scan another
+                Navigator.of(context).pop();
+              }
+            }
+          })
+          .catchError((e) {
+            _showError('Failed to add account: $e');
+          });
     } catch (e) {
       _showError('Invalid QR Code: $e');
     }
@@ -107,10 +107,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
           ),
         ],
       ),
-      body: MobileScanner(
-        controller: controller,
-        onDetect: _handleBarcode,
-      ),
+      body: MobileScanner(controller: controller, onDetect: _handleBarcode),
     );
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/account_provider.dart';
 import '../widgets/account_tile.dart';
-import 'add_account_screen.dart';
 import 'scan_qr_screen.dart';
 import 'import_export_screen.dart';
 import 'about_screen.dart';
@@ -14,14 +13,16 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Authenticator'),
+        title: const Text('Flauth'),
         actions: [
           IconButton(
             icon: const Icon(Icons.import_export),
             tooltip: 'Import / Export',
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const ImportExportScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const ImportExportScreen(),
+                ),
               );
             },
           ),
@@ -47,7 +48,9 @@ class HomeScreen extends StatelessWidget {
                 backgroundColor: Colors.transparent,
                 // Change color to red when time is running out (< 20%).
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  provider.progress < 0.2 ? Colors.red : Theme.of(context).primaryColor,
+                  provider.progress < 0.2
+                      ? Colors.red
+                      : Theme.of(context).primaryColor,
                 ),
               );
             },
@@ -65,12 +68,12 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     'No accounts yet',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Colors.grey,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleLarge?.copyWith(color: Colors.grey),
                   ),
                   const SizedBox(height: 8),
-                  const Text('Tap + to add an account'),
+                  const Text('Tap the button below to scan a QR code'),
                 ],
               ),
             );
@@ -83,32 +86,14 @@ class HomeScreen extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Button to open the QR Scanner
-          FloatingActionButton.extended(
-            heroTag: 'scan',
-            onPressed: () {
-               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const ScanQrScreen()),
-              );
-            },
-            icon: const Icon(Icons.qr_code_scanner),
-            label: const Text('Scan'),
-          ),
-          const SizedBox(width: 16),
-          // Button to open the Manual Entry screen
-          FloatingActionButton(
-            heroTag: 'add',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const AddAccountScreen()),
-              );
-            },
-            child: const Icon(Icons.add),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (context) => const ScanQrScreen()));
+        },
+        icon: const Icon(Icons.qr_code_scanner),
+        label: const Text('Scan'),
       ),
     );
   }

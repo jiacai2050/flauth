@@ -18,12 +18,7 @@ class Account {
 
   // Convert to Map for JSON serialization
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'secret': secret,
-      'issuer': issuer,
-    };
+    return {'id': id, 'name': name, 'secret': secret, 'issuer': issuer};
   }
 
   // Create an Account object from a Map (deserialization)

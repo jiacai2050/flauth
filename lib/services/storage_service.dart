@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/account.dart';
 
@@ -7,28 +8,47 @@ import '../models/account.dart';
 /// (Keychain on iOS, Keystore on Android).
 class StorageService {
   final _storage = const FlutterSecureStorage();
-  static const _keyAccounts = 'totp_accounts';
   static const _keyWebDavConfig = 'webdav_config';
+  static const _accountPrefix = 'account_';
 
   /// Retrieves the list of accounts from secure storage.
-  /// Returns an empty list if no data is found or if parsing fails.
+  /// Each account is stored with its own key prefixed by 'account_'.
   Future<List<Account>> getAccounts() async {
-    final String? accountsJson = await _storage.read(key: _keyAccounts);
-    if (accountsJson == null) {
-      return [];
-    }
-    try {
-      final List<dynamic> decoded = json.decode(accountsJson);
-      return decoded.map((e) => Account.fromMap(e)).toList();
-    } catch (e) {
-      return [];
-    }
+    final allItems = await _storage.readAll();
+    final List<Account> accounts = [];
+
+    allItems.forEach((key, value) {
+      if (key.startsWith(_accountPrefix)) {
+        try {
+          accounts.add(Account.fromJson(value));
+        } catch (e) {
+          // Ignore corrupted or invalid JSON entries
+          debugPrint('Failed to parse account from key $key: $e');
+        }
+      }
+    });
+    
+    return accounts;
   }
 
-  /// Serializes and saves the list of accounts to secure storage.
+  /// Saves a single account to its own secure key.
+  Future<void> saveAccount(Account account) async {
+    await _storage.write(
+      key: '$_accountPrefix${account.id}', 
+      value: account.toJson()
+    );
+  }
+
+  /// Deletes a specific account by its ID.
+  Future<void> deleteAccount(String id) async {
+    await _storage.delete(key: '$_accountPrefix$id');
+  }
+
+  /// Saves multiple accounts (useful for restore/import).
   Future<void> saveAccounts(List<Account> accounts) async {
-    final String encoded = json.encode(accounts.map((e) => e.toMap()).toList());
-    await _storage.write(key: _keyAccounts, value: encoded);
+    for (var acc in accounts) {
+      await saveAccount(acc);
+    }
   }
 
   // WebDAV Config

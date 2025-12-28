@@ -10,7 +10,7 @@ class AccountProvider with ChangeNotifier {
   final StorageService _storageService = StorageService();
   List<Account> _accounts = [];
   Timer? _timer;
-  
+
   // Progress of the current 30-second TOTP window (1.0 = full, 0.0 = empty).
   double _progress = 1.0;
 
@@ -30,10 +30,10 @@ class AccountProvider with ChangeNotifier {
       // TOTP codes are valid for 30 seconds.
       // We calculate how many seconds have passed in the current window.
       final seconds = (now / 1000) % 30;
-      
+
       // Calculate remaining percentage for the progress bar.
       _progress = 1.0 - (seconds / 30.0);
-      
+
       // Notify UI to redraw (updating the progress bar and the codes if the window changed).
       notifyListeners();
     });
@@ -46,9 +46,13 @@ class AccountProvider with ChangeNotifier {
 
   /// Adds a new account and persists it to storage.
   /// Returns true if added, false if duplicate secret exists.
-  Future<bool> addAccount(String name, String secret, {String issuer = ''}) async {
+  Future<bool> addAccount(
+    String name,
+    String secret, {
+    String issuer = '',
+  }) async {
     final cleanSecret = secret.replaceAll(' ', '').toUpperCase();
-    
+
     // Check for duplicates
     if (_accounts.any((a) => a.secret == cleanSecret)) {
       return false;
@@ -61,14 +65,14 @@ class AccountProvider with ChangeNotifier {
       issuer: issuer,
     );
     _accounts.add(newAccount);
-    await _storageService.saveAccounts(_accounts);
+    await _storageService.saveAccount(newAccount);
     notifyListeners();
     return true;
   }
 
   Future<void> deleteAccount(String id) async {
     _accounts.removeWhere((a) => a.id == id);
-    await _storageService.saveAccounts(_accounts);
+    await _storageService.deleteAccount(id);
     notifyListeners();
   }
 
@@ -79,7 +83,7 @@ class AccountProvider with ChangeNotifier {
       return false;
     }
     _accounts.add(account);
-    await _storageService.saveAccounts(_accounts);
+    await _storageService.saveAccount(account);
     notifyListeners();
     return true;
   }
@@ -89,7 +93,12 @@ class AccountProvider with ChangeNotifier {
     return _storageService.getWebDavConfig();
   }
 
-  Future<void> saveWebDavConfig(String url, String username, String password, String path) async {
+  Future<void> saveWebDavConfig(
+    String url,
+    String username,
+    String password,
+    String path,
+  ) async {
     await _storageService.saveWebDavConfig(url, username, password, path);
     notifyListeners();
   }
@@ -101,36 +110,36 @@ class AccountProvider with ChangeNotifier {
 
   /// Imports accounts from a text string (one URI per line).
   /// Returns the number of NEW accounts successfully imported.
-  Future<int> importAccountsFromText(String text) async {
-    int count = 0;
-    final lines = text.split('\n');
-    bool changed = false;
-
-    for (var line in lines) {
-      if (line.trim().isEmpty) continue;
-      try {
-        final uri = Uri.parse(line.trim());
-        final account = Account.fromUri(uri);
-        
-        // Check for duplicates based on secret
-        if (!_accounts.any((a) => a.secret == account.secret)) {
-          _accounts.add(account);
-          count++;
-          changed = true;
+    Future<int> importAccountsFromText(String text) async {
+      int count = 0;
+      final lines = text.split('\n');
+      final List<Account> newAccounts = [];
+  
+      for (var line in lines) {
+        if (line.trim().isEmpty) continue;
+        try {
+          final uri = Uri.parse(line.trim());
+          final account = Account.fromUri(uri);
+          
+          // Check for duplicates based on secret
+          if (!_accounts.any((a) => a.secret == account.secret)) {
+            _accounts.add(account);
+            newAccounts.add(account);
+            count++;
+          }
+        } catch (e) {
+          // Skip invalid lines
+          debugPrint('Skipping invalid line: $line ($e)');
         }
-      } catch (e) {
-        // Skip invalid lines
-        debugPrint('Skipping invalid line: $line ($e)');
       }
+      
+      if (newAccounts.isNotEmpty) {
+        // Only save the newly added accounts
+        await _storageService.saveAccounts(newAccounts);
+        notifyListeners();
+      }
+      return count;
     }
-    
-    if (changed) {
-      await _storageService.saveAccounts(_accounts);
-      notifyListeners();
-    }
-    return count;
-  }
-
   /// Generates the current 6-digit TOTP code for a given secret.
   String getCurrentCode(String secret) {
     try {

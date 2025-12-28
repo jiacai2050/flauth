@@ -369,21 +369,14 @@ class _ImportExportScreenState extends State<ImportExportScreen>
           // WebDAV Tab
           _buildActionView(
             icon: Icons.cloud_sync,
-
             title: 'WebDAV Cloud',
-
-            desc: 'Sync backups with your private cloud (Nextcloud,坚果云, etc).',
-
+            desc:
+                'Sync backups with your private cloud (Nextcloud, InfiniCloud etc).',
             btn1Text: 'Upload to Cloud',
-
             btn1Icon: Icons.cloud_upload,
-
             btn1Action: _handleWebDavUpload,
-
             btn2Text: 'Restore from Cloud',
-
             btn2Icon: Icons.cloud_download,
-
             btn2Action: _handleWebDavDownload,
           ),
         ],

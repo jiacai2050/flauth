@@ -1,0 +1,85 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-and-release:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux
+            artifact_name: flauth-linux
+            asset_extension: .tar.gz
+            asset_content_type: application/gzip
+          - os: windows-latest
+            target: windows
+            artifact_name: flauth-windows
+            asset_extension: .zip
+            asset_content_type: application/zip
+          - os: macos-latest
+            target: macos
+            artifact_name: flauth-macos
+            asset_extension: .zip
+            asset_content_type: application/zip
+          - os: ubuntu-latest
+            target: apk
+            artifact_name: flauth-android
+            asset_extension: .apk
+            asset_content_type: application/vnd.android.package-archive
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Install dependencies (Linux)
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev libjsoncpp-dev libgmime-3.0-dev
+
+      - name: Install dependencies (Flutter)
+        run: flutter pub get
+
+      - name: Get Version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Build
+        shell: bash
+        run: |
+          VERSION_TAG=${{ env.VERSION }}
+          ARTIFACT_BASE="${{ matrix.artifact_name }}-${VERSION_TAG}"
+
+          if [ "${{ matrix.target }}" == "linux" ]; then
+            flutter build linux --release
+            tar -czvf ${ARTIFACT_BASE}${{ matrix.asset_extension }} -C build/linux/x64/release/bundle .
+          elif [ "${{ matrix.target }}" == "windows" ]; then
+            flutter build windows --release
+            Compress-Archive -Path build\windows\runner\Release\* -DestinationPath ${ARTIFACT_BASE}${{ matrix.asset_extension }}
+          elif [ "${{ matrix.target }}" == "macos" ]; then
+            flutter build macos --release
+            cd build/macos/Build/Products/Release
+            zip -r ../../../../${ARTIFACT_BASE}${{ matrix.asset_extension }} flauth.app
+          elif [ "${{ matrix.target }}" == "apk" ]; then
+            flutter build apk --release
+            mv build/app/outputs/flutter-apk/app-release.apk ${ARTIFACT_BASE}${{ matrix.asset_extension }}
+          fi
+
+      - name: Upload Artifact
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
