@@ -52,12 +52,23 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
       // Add the account to the provider
       Provider.of<AccountProvider>(context, listen: false)
           .addAccountObject(account)
-          .then((_) {
+          .then((success) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Added account: ${account.name}')),
-          );
-          Navigator.of(context).pop(); // Return to previous screen (Home)
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Added account: ${account.name}')),
+            );
+            Navigator.of(context).pop(); // Return to previous screen (Home)
+          } else {
+             ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Account already exists: ${account.name}'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+            // Optionally pop or let user scan another
+             Navigator.of(context).pop();
+          }
         }
       }).catchError((e) {
         _showError('Failed to add account: $e');

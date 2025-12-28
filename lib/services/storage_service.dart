@@ -8,6 +8,7 @@ import '../models/account.dart';
 class StorageService {
   final _storage = const FlutterSecureStorage();
   static const _keyAccounts = 'totp_accounts';
+  static const _keyWebDavConfig = 'webdav_config';
 
   /// Retrieves the list of accounts from secure storage.
   /// Returns an empty list if no data is found or if parsing fails.
@@ -28,5 +29,26 @@ class StorageService {
   Future<void> saveAccounts(List<Account> accounts) async {
     final String encoded = json.encode(accounts.map((e) => e.toMap()).toList());
     await _storage.write(key: _keyAccounts, value: encoded);
+  }
+
+  // WebDAV Config
+  Future<Map<String, String>?> getWebDavConfig() async {
+    final String? jsonStr = await _storage.read(key: _keyWebDavConfig);
+    if (jsonStr == null) return null;
+    try {
+      return Map<String, String>.from(json.decode(jsonStr));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> saveWebDavConfig(String url, String username, String password, String path) async {
+    final map = {
+      'url': url,
+      'username': username,
+      'password': password,
+      'path': path,
+    };
+    await _storage.write(key: _keyWebDavConfig, value: json.encode(map));
   }
 }

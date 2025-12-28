@@ -45,18 +45,25 @@ class AccountProvider with ChangeNotifier {
   }
 
   /// Adds a new account and persists it to storage.
-  Future<void> addAccount(String name, String secret, {String issuer = ''}) async {
-    // Generate a unique ID for the account.
+  /// Returns true if added, false if duplicate secret exists.
+  Future<bool> addAccount(String name, String secret, {String issuer = ''}) async {
+    final cleanSecret = secret.replaceAll(' ', '').toUpperCase();
+    
+    // Check for duplicates
+    if (_accounts.any((a) => a.secret == cleanSecret)) {
+      return false;
+    }
+
     final newAccount = Account(
       id: const Uuid().v4(),
       name: name,
-      // Ensure secret is uppercase and has no spaces, as required by Base32 decoding.
-      secret: secret.replaceAll(' ', '').toUpperCase(),
+      secret: cleanSecret,
       issuer: issuer,
     );
     _accounts.add(newAccount);
     await _storageService.saveAccounts(_accounts);
     notifyListeners();
+    return true;
   }
 
   Future<void> deleteAccount(String id) async {
@@ -66,9 +73,24 @@ class AccountProvider with ChangeNotifier {
   }
 
   /// Adds an account directly (e.g. from URI parsing)
-  Future<void> addAccountObject(Account account) async {
+  Future<bool> addAccountObject(Account account) async {
+    // Check for duplicates
+    if (_accounts.any((a) => a.secret == account.secret)) {
+      return false;
+    }
     _accounts.add(account);
     await _storageService.saveAccounts(_accounts);
+    notifyListeners();
+    return true;
+  }
+
+  // WebDAV
+  Future<Map<String, String>?> getWebDavConfig() {
+    return _storageService.getWebDavConfig();
+  }
+
+  Future<void> saveWebDavConfig(String url, String username, String password, String path) async {
+    await _storageService.saveWebDavConfig(url, username, password, path);
     notifyListeners();
   }
 
@@ -78,26 +100,31 @@ class AccountProvider with ChangeNotifier {
   }
 
   /// Imports accounts from a text string (one URI per line).
-  /// Returns the number of accounts successfully imported.
+  /// Returns the number of NEW accounts successfully imported.
   Future<int> importAccountsFromText(String text) async {
     int count = 0;
     final lines = text.split('\n');
+    bool changed = false;
+
     for (var line in lines) {
       if (line.trim().isEmpty) continue;
       try {
         final uri = Uri.parse(line.trim());
         final account = Account.fromUri(uri);
-        // Check for duplicates based on secret to avoid double entry?
-        // For now, we allow duplicates or could check secret.
-        // Let's simple add.
-        _accounts.add(account);
-        count++;
+        
+        // Check for duplicates based on secret
+        if (!_accounts.any((a) => a.secret == account.secret)) {
+          _accounts.add(account);
+          count++;
+          changed = true;
+        }
       } catch (e) {
         // Skip invalid lines
         debugPrint('Skipping invalid line: $line ($e)');
       }
     }
-    if (count > 0) {
+    
+    if (changed) {
       await _storageService.saveAccounts(_accounts);
       notifyListeners();
     }

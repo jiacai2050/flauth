@@ -47,6 +47,7 @@ dependencies:
   flutter_file_dialog: ^3.0.3
   url_launcher: ^6.3.2
   package_info_plus: ^9.0.0
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:

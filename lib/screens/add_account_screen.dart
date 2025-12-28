@@ -24,15 +24,27 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  void _submit() async {
     if (_formKey.currentState!.validate()) {
       // Add the account manually using the input values
-      Provider.of<AccountProvider>(context, listen: false).addAccount(
+      final success = await Provider.of<AccountProvider>(context, listen: false).addAccount(
         _nameController.text,
         _secretController.text,
         issuer: _issuerController.text,
       );
-      Navigator.of(context).pop();
+      
+      if (!mounted) return;
+
+      if (success) {
+        Navigator.of(context).pop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account with this secret already exists'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
     }
   }
 
