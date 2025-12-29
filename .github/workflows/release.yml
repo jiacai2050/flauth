@@ -63,37 +63,45 @@ jobs:
 
       - name: Set env(release)
         if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
         run: |
           echo "VERSION=${{  github.ref_name }}" >> $GITHUB_ENV
       - name: Set env(dev)
         if: "!startsWith(github.ref, 'refs/tags/')"
+        shell: bash
         run: |
           echo "VERSION=unknown" >> $GITHUB_ENV
 
-      - name: Build
+      - name: Build Linux
+        if: matrix.target == 'linux'
         run: |
-          VERSION_TAG=${{ env.VERSION }}
-          ARTIFACT_BASE="${{ matrix.artifact_name }}-${VERSION_TAG}"
+          flutter build linux --release
+          tar -czvf ${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }} -C build/linux/x64/release/bundle .
 
-          if [ "${{ matrix.target }}" == "linux" ]; then
-            flutter build linux --release
-            tar -czvf ${ARTIFACT_BASE}${{ matrix.asset_extension }} -C build/linux/x64/release/bundle .
-          elif [ "${{ matrix.target }}" == "windows" ]; then
-            flutter build windows --release
-            Compress-Archive -Path build\windows\runner\Release\* -DestinationPath ${ARTIFACT_BASE}${{ matrix.asset_extension }}
-          elif [ "${{ matrix.target }}" == "macos" ]; then
-            flutter build macos --release
-            cd build/macos/Build/Products/Release
-            zip -r ../../../../${ARTIFACT_BASE}${{ matrix.asset_extension }} flauth.app
-          elif [ "${{ matrix.target }}" == "apk" ]; then
-            flutter build apk --release
-            mv build/app/outputs/flutter-apk/app-release.apk ${ARTIFACT_BASE}${{ matrix.asset_extension }}
-          fi
+      - name: Build Windows
+        if: matrix.target == 'windows'
+        run: |
+          flutter build windows --release
+          Compress-Archive -Path build\windows\runner\Release\* -DestinationPath ${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }}
+
+      - name: Build macOS
+        if: matrix.target == 'macos'
+        run: |
+          flutter build macos --release
+          cd build/macos/Build/Products/Release
+          zip -r ../../../../${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }} flauth.app
+
+      - name: Build Android
+        if: matrix.target == 'apk'
+        run: |
+          flutter build apk --release
+          mv build/app/outputs/flutter-apk/app-release.apk ${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }}
 
       - name: Upload
         if: "!startsWith(github.ref, 'refs/tags/')"
         uses: actions/upload-artifact@v4
         with:
+          name: ${{ matrix.artifact_name }}
           path: ${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }}
 
       - name: Release
