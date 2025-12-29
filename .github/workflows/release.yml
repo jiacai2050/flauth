@@ -23,22 +23,22 @@ jobs:
         include:
           - os: ubuntu-latest
             target: linux
-            artifact_name: flauth-linux
+            artifact_name: flauth-linux-x86_64
             asset_extension: .tar.gz
             asset_content_type: application/gzip
           - os: windows-latest
             target: windows
-            artifact_name: flauth-windows
+            artifact_name: flauth-windows-x86_64
             asset_extension: .zip
             asset_content_type: application/zip
           - os: macos-latest
             target: macos
-            artifact_name: flauth-macos
+            artifact_name: flauth-macos-universal
             asset_extension: .zip
             asset_content_type: application/zip
           - os: ubuntu-latest
             target: apk
-            artifact_name: flauth-android
+            artifact_name: flauth-android-universal
             asset_extension: .apk
             asset_content_type: application/vnd.android.package-archive
 
