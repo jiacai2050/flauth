@@ -89,7 +89,7 @@ jobs:
         run: |
           flutter build macos --release
           cd build/macos/Build/Products/Release
-          zip -r ../../../../${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }} flauth.app
+          zip -r "$GITHUB_WORKSPACE/${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }}" flauth.app
 
       - name: Build Android
         if: matrix.target == 'apk'
