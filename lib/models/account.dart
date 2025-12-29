@@ -60,7 +60,7 @@ class Account {
       throw const FormatException('Invalid scheme or host');
     }
 
-    final String path = uri.path;
+    final String path = Uri.decodeComponent(uri.path);
     // The path usually contains the label (Issuer:Account or just Account)
     String name = path.startsWith('/') ? path.substring(1) : path;
     String issuer = '';

@@ -1,5 +1,5 @@
 name: flauth
-description: "A secure, open-source two-factor authentication (2FA) app built with Flutter."
+description: "A privacy-first, fully open-source TOTP authenticator for Android, macOS, Windows, and Linux."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev

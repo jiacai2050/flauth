@@ -27,15 +27,15 @@ class StorageService {
         }
       }
     });
-    
+
     return accounts;
   }
 
   /// Saves a single account to its own secure key.
   Future<void> saveAccount(Account account) async {
     await _storage.write(
-      key: '$_accountPrefix${account.id}', 
-      value: account.toJson()
+      key: '$_accountPrefix${account.id}',
+      value: account.toJson(),
     );
   }
 
@@ -62,7 +62,12 @@ class StorageService {
     }
   }
 
-  Future<void> saveWebDavConfig(String url, String username, String password, String path) async {
+  Future<void> saveWebDavConfig(
+    String url,
+    String username,
+    String password,
+    String path,
+  ) async {
     final map = {
       'url': url,
       'username': username,

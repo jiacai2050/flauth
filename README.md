@@ -2,7 +2,9 @@
 
 [中文说明](./README_zh.md)
 
-Flauth is a secure, open-source TOTP (Time-based One-Time Password) authenticator built with Flutter. It provides a simple, beautiful, and lightweight solution for managing your 2FA (Two-Factor Authentication) tokens.
+> Flauth is a privacy-first, fully open-source TOTP authenticator for Android, macOS, Windows, and Linux.
+
+It provides a simple and lightweight solution for managing your 2FA (Two-Factor Authentication) tokens.
 
 ## 🌟 Why Flauth?
 
@@ -15,29 +17,18 @@ Flauth is a secure, open-source TOTP (Time-based One-Time Password) authenticato
   - **Granular Storage**: Implements "One Key Per Account" architecture for maximum reliability and scalability.
 - **Modern UI**: Focused on simplicity. Built with Material 3, supporting adaptive light and dark modes.
 
-## ✨ Features
+## 📸 Screenshots
 
-- **TOTP Generation**: Standard 6-digit codes refreshing every 30 seconds.
-- **QR Code Scanner**: Quickly add accounts by scanning standard `otpauth://` QR codes.
-- **Live Progress**: Visual timer indicating code expiration.
-- **Deduplication**: Intelligent duplicate check based on secret keys to prevent account bloat.
-- **Easy Management**: Tap to copy, swipe to delete with confirmation.
-
-![](assets/account-empty.png)
 ![](assets/backup-local.png)
 ![](assets/backup-webdav.png)
 ![](assets/account-two.png)
+**Easy Management**: Tap to copy, swipe to delete with confirmation.
 
-## 🛠️ Tech Stack
+## ⬇️ Download
 
-- **Framework**: Flutter & Dart
-- **State Management**: [Provider](https://pub.dev/packages/provider)
-- **Core Logic**: [OTP](https://pub.dev/packages/otp)
-- **Security**: [Flutter Secure Storage](https://pub.dev/packages/flutter_secure_storage)
-- **Scanner**: [Mobile Scanner](https://pub.dev/packages/mobile_scanner)
-- **Networking**: Standard [http](https://pub.dev/packages/http) for lightweight WebDAV.
+You can find the latest pre-compiled binaries for all supported platforms (Android APK, macOS, Linux, and Windows) on the **[GitHub Releases](https://github.com/jiacai2050/flauth/releases)** page.
 
-## 🚀 Getting Started
+## 🛠️ Development
 
 ### Prerequisites
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) installed.
@@ -47,23 +38,39 @@ Flauth is a secure, open-source TOTP (Time-based One-Time Password) authenticato
   brew install cocoapods
   ```
 
-### Installation
+### Build & Run
 
-1. Clone the repository:
+1. **Clone the repository**:
    ```bash
    git clone https://github.com/jiacai2050/flauth.git
    cd flauth
    ```
 
-2. Install dependencies:
+2. **Install dependencies**:
    ```bash
    flutter pub get
    ```
 
-3. Run the application:
+3. **Run the application**:
    ```bash
    flutter run
    ```
+
+4. **Build for release**:
+   ```bash
+   flutter build apk      # Android
+   flutter build macos    # macOS
+   flutter build windows  # Windows
+   flutter build linux    # Linux
+   ```
+
+### Quality & Standards
+
+Run the following commands to ensure code quality:
+```bash
+flutter analyze        # Static analysis
+flutter test           # Run unit tests
+```
 
 ## 🏗️ Platform Specifics
 

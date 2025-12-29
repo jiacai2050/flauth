@@ -52,26 +52,53 @@ void main() {
       expect(uri, contains('issuer=Google'));
     });
 
+    test('should encode special characters in toUriString', () {
+      final account = Account(
+        id: '1',
+        name: 'Test Token',
+        secret: 'SECRET',
+        issuer: 'My Issuer',
+      );
+
+      final uri = account.toUriString();
+      // Path should use %20
+      expect(uri, contains('My%20Issuer:Test%20Token'));
+      // Query parameters typically use + for spaces in Dart's Uri implementation
+      expect(uri, contains('issuer=My+Issuer'));
+    });
+
     test('should parse valid otpauth URI', () {
-      final uriStr = 'otpauth://totp/Example:alice@google.com?secret=JBSWY3DPEHPK3PXP&issuer=Example';
+      final uriStr =
+          'otpauth://totp/Example:alice@google.com?secret=JBSWY3DPEHPK3PXP&issuer=Example';
       final uri = Uri.parse(uriStr);
-      
+
       final account = Account.fromUri(uri);
-      
       expect(account.name, 'alice@google.com');
       expect(account.secret, 'JBSWY3DPEHPK3PXP');
       expect(account.issuer, 'Example');
       expect(account.id, isNotEmpty); // ID should be generated
     });
-    
+
     test('should parse URI without issuer prefix in label', () {
-      final uriStr = 'otpauth://totp/alice@google.com?secret=JBSWY3DPEHPK3PXP&issuer=Google';
+      final uriStr =
+          'otpauth://totp/alice@google.com?secret=JBSWY3DPEHPK3PXP&issuer=Google';
       final uri = Uri.parse(uriStr);
-      
+
       final account = Account.fromUri(uri);
-      
+
       expect(account.name, 'alice@google.com');
       expect(account.issuer, 'Google');
+    });
+
+    test('should decode %20 as space in URI path', () {
+      final uriStr =
+          'otpauth://totp/2FAS:Test%20Token?secret=2FASTEST&issuer=2FAS';
+      final uri = Uri.parse(uriStr);
+
+      final account = Account.fromUri(uri);
+
+      expect(account.name, 'Test Token');
+      expect(account.issuer, '2FAS');
     });
 
     test('fromUri should throw on invalid scheme', () {
@@ -80,8 +107,8 @@ void main() {
     });
 
     test('fromUri should throw on missing secret', () {
-       final uri = Uri.parse('otpauth://totp/Test?issuer=Test');
-       expect(() => Account.fromUri(uri), throwsFormatException);
+      final uri = Uri.parse('otpauth://totp/Test?issuer=Test');
+      expect(() => Account.fromUri(uri), throwsFormatException);
     });
   });
 }
