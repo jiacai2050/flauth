@@ -9,4 +9,4 @@ perl -i -pe '
   s/PROVISIONING_PROFILE_SPECIFIER = .*?;/PROVISIONING_PROFILE_SPECIFIER = "";/g;
 ' "$FILE"
 
-echo "✅ 签名配置已完全禁用"
+echo "✅ Signing configuration disabled"

@@ -82,7 +82,7 @@ jobs:
         if: matrix.target == 'windows'
         run: |
           flutter build windows --release
-          Compress-Archive -Path build\windows\runner\Release\* -DestinationPath ${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }}
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath ${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }}
 
       - name: Build macOS
         if: matrix.target == 'macos'
