@@ -42,6 +42,10 @@ Flauth is a secure, open-source TOTP (Time-based One-Time Password) authenticato
 ### Prerequisites
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) installed.
 - Appropriate development environment (Xcode for iOS/macOS, Android Studio for Android).
+- CocoaPods for iOS/macOS dependencies:
+  ```bash
+  brew install cocoapods
+  ```
 
 ### Installation
 
