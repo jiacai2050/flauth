@@ -76,7 +76,7 @@ To build on macOS, ensure you have set up a **Development Team** in Xcode for co
 
 Run the following command to remove the quarantine attribute if you encounter issues when launching the app:
 ```bash
-sudo xattr -rd com.apple.quarantine /Applications/Flauth.app
+xattr -rd com.apple.quarantine /Applications/Flauth.app
 ```
 
 ## 🛡️ Permissions
