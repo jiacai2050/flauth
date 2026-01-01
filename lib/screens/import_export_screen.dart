@@ -361,6 +361,8 @@ class _ImportExportScreenState extends State<ImportExportScreen>
         if (!mounted) return;
         final provider = Provider.of<AccountProvider>(context, listen: false);
         final count = await provider.importAccountsFromText(decryptedContent);
+
+        if (!mounted) return;
         if (count > 0) {
           _showSnackBar('Successfully synced $count new accounts');
         } else {
@@ -623,7 +625,7 @@ class _SetPasswordDialogState extends State<_SetPasswordDialog> {
         FilledButton(
           onPressed: () {
             if (_formKey.currentState!.validate()) {
-              Navigator.pop(context, _passCtrl.text);
+              Navigator.pop(context, _passCtrl.text.trim());
             }
           },
           child: const Text('Encrypt'),
