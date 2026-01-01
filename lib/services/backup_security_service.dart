@@ -7,7 +7,7 @@ import 'package:pointycastle/export.dart' as pc;
 /// Provides encryption and decryption services for secure backups.
 /// Uses AES-256-CBC with PBKDF2 (HMAC-SHA256) key derivation.
 class BackupSecurityService {
-  static const int _pbkdf2Iterations = 10000;
+  static const int _pbkdf2Iterations = 600000;
   static const int _keyLength = 32; // 256 bits
   static const int _saltLength = 16; // 128 bits
   static const int _ivLength = 16; // 128 bits (AES block size)
