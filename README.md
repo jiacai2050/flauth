@@ -10,6 +10,7 @@ It provides a simple and lightweight solution for managing your 2FA (Two-Factor 
 
 - **100% Open Source**: Transparent and trustable code. Your secrets never leave your device unless you choose to sync them.
 - **Flexible Backups**:
+  - **Security Logic**: Detailed [backup and restore mechanisms](./docs/backup.md).
   - **Local Backup**: Export/Import accounts as standard text files using system file pickers.
   - **WebDAV Sync**: Seamlessly sync your data with your private cloud (Nextcloud, Nutstore, etc.) using a robust single-file sync approach with custom path support.
 - **Privacy & Security**:
