@@ -77,11 +77,13 @@ class BackupSecurityService {
 
       return decrypted;
     } catch (e) {
-      if (e is Error) {
-         // Encryption errors often manifest as StateErrors or ArgumentErrors in underlying libs
-         throw Exception('Decryption failed: Invalid password or corrupted file.');
+      // Preserve format-related errors (e.g., invalid JSON / backup structure)
+      if (e is FormatException) {
+        rethrow;
       }
-      rethrow;
+      // For all other failures, surface a user-friendly message for likely
+      // invalid password or corrupted ciphertext.
+      throw Exception('Decryption failed: Invalid password or corrupted file.');
     }
   }
 
