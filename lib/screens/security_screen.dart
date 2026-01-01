@@ -132,6 +132,17 @@ class _SecurityScreenState extends State<SecurityScreen> {
                 auth.toggleBiometrics(val);
               },
             ),
+            const Divider(),
+            SwitchListTile(
+              title: const Text('Use PIN for Backup'),
+              subtitle: const Text(
+                'Automatically use your App PIN to encrypt/decrypt backups',
+              ),
+              value: auth.isUsePinForBackupEnabled,
+              onChanged: (val) {
+                auth.toggleUsePinForBackup(val);
+              },
+            ),
           ],
         ],
       ),

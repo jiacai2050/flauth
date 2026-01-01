@@ -15,6 +15,7 @@ class StorageService {
   static const _keyFailedAttempts = 'auth_failed_attempts';
   static const _keyLockoutEnd = 'auth_lockout_end';
   static const _keyAccountOrder = 'auth_account_order';
+  static const _keyUsePinForBackup = 'auth_use_pin_for_backup';
   static const _accountPrefix = 'account_';
 
   /// Retrieves the list of accounts from secure storage.
@@ -102,6 +103,15 @@ class StorageService {
 
   Future<bool> isPinSetupSkipped() async {
     final val = await _storage.read(key: _keyPinSkipped);
+    return val == 'true';
+  }
+
+  Future<void> setUsePinForBackup(bool enabled) async {
+    await _storage.write(key: _keyUsePinForBackup, value: enabled.toString());
+  }
+
+  Future<bool> isUsePinForBackup() async {
+    final val = await _storage.read(key: _keyUsePinForBackup);
     return val == 'true';
   }
 
