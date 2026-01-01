@@ -8,7 +8,15 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import '../providers/account_provider.dart';
+import '../services/backup_security_service.dart';
 import 'webdav_config_screen.dart';
+
+class ExportData {
+  final String content;
+  final String extension;
+
+  ExportData(this.content, this.extension);
+}
 
 class ImportExportScreen extends StatefulWidget {
   const ImportExportScreen({super.key});
@@ -37,42 +45,189 @@ class _ImportExportScreenState extends State<ImportExportScreen>
     super.dispose();
   }
 
+  // --- Helper Dialogs ---
+
+  Future<String?> _showSetPasswordDialog() async {
+    final passCtrl = TextEditingController();
+    final confirmCtrl = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Encrypt Backup?'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Protect your backup with a password. If you lose this password, you cannot restore your accounts.',
+                style: TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: passCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+                validator: (val) =>
+                    (val == null || val.length < 6)
+                        ? 'Min 6 characters'
+                        : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: confirmCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Confirm Password',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+                validator: (val) =>
+                    val != passCtrl.text ? 'Passwords do not match' : null,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Cancel export
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, ''), // Skip encryption
+            child: const Text('Skip (Plain Text)'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                Navigator.pop(context, passCtrl.text);
+              }
+            },
+            child: const Text('Encrypt'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<String?> _showEnterPasswordDialog() async {
+    final passCtrl = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Decrypt Backup'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('This file is encrypted. Please enter the password.'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: passCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
+              obscureText: true,
+              autofocus: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, passCtrl.text),
+            child: const Text('Unlock'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- Unified Security Logic ---
+
+  Future<ExportData?> _prepareExportContent() async {
+    final provider = Provider.of<AccountProvider>(context, listen: false);
+    final rawText = provider.exportAccountsToText();
+
+    if (rawText.isEmpty) {
+      _showSnackBar('No accounts to export');
+      return null;
+    }
+
+    // Ask for encryption
+    final password = await _showSetPasswordDialog();
+    if (!mounted) return null;
+    if (password == null) {
+      // User cancelled
+      return null;
+    }
+
+    String finalContent = rawText;
+    String extension = 'txt';
+
+    if (password.isNotEmpty) {
+      // Encrypt
+      try {
+        finalContent = BackupSecurityService.encrypt(rawText, password);
+        extension = 'flauth';
+      } catch (e) {
+        _showSnackBar('Encryption failed: $e', isError: true);
+        return null;
+      }
+    }
+    return ExportData(finalContent, extension);
+  }
+
+  Future<String?> _processImportContent(String content) async {
+    // Check encryption
+    if (BackupSecurityService.isEncrypted(content)) {
+      final password = await _showEnterPasswordDialog();
+      if (!mounted) return null;
+      if (password == null) {
+        // Cancelled
+        return null;
+      }
+      try {
+        return BackupSecurityService.decrypt(content, password);
+      } catch (e) {
+        _showSnackBar('Decryption failed: $e', isError: true);
+        return null;
+      }
+    }
+    return content;
+  }
+
   // --- Local File Handlers ---
 
   Future<void> _handleLocalExport() async {
     setState(() => _isLoading = true);
 
     try {
-      final provider = Provider.of<AccountProvider>(context, listen: false);
-
-      final text = provider.exportAccountsToText();
-
-      if (text.isEmpty) {
-        _showSnackBar('No accounts to export');
-
-        return;
-      }
+      final exportData = await _prepareExportContent();
+      if (exportData == null) return;
 
       final now = DateTime.now();
-
       final fileName =
-          'flauth-${DateFormat('yyyyMMdd-HHmmss').format(now)}.txt';
+          'flauth-${DateFormat('yyyyMMdd-HHmmss').format(now)}.${exportData.extension}';
 
       if (Platform.isAndroid) {
         // Android: Use System "Save As" dialog via SAF (Storage Access Framework)
-
         // 1. Write to temp file first
-
         final directory = await getTemporaryDirectory();
-
         final tempFile = File('${directory.path}/$fileName');
-
-        await tempFile.writeAsString(text);
+        await tempFile.writeAsString(exportData.content);
 
         // 2. Hand over to system dialog
-
         final params = SaveFileDialogParams(sourceFilePath: tempFile.path);
-
         final finalPath = await FlutterFileDialog.saveFile(params: params);
 
         if (finalPath != null) {
@@ -80,40 +235,29 @@ class _ImportExportScreenState extends State<ImportExportScreen>
         }
       } else if (Platform.isIOS) {
         // iOS: Save to Documents
-
         final directory = await getApplicationDocumentsDirectory();
-
         final outputPath = '${directory.path}/$fileName';
-
         final file = File(outputPath);
-
-        await file.writeAsString(text);
+        await file.writeAsString(exportData.content);
 
         _showSnackBar('Saved to "Files" App > On My iPhone > Flauth');
       } else {
         // Desktop: Use Save Dialog
-
         final outputPath = await FilePicker.platform.saveFile(
           dialogTitle: 'Save Backup File',
-
           fileName: fileName,
-
           type: FileType.custom,
-
-          allowedExtensions: ['txt'],
+          allowedExtensions: [exportData.extension],
         );
 
         if (outputPath != null) {
           final file = File(outputPath);
-
-          await file.writeAsString(text);
-
+          await file.writeAsString(exportData.content);
           _showSnackBar('Saved to: $outputPath');
         }
       }
     } catch (e) {
       debugPrint('Export error: $e');
-
       _showSnackBar('Export failed: ${e.toString()}', isError: true);
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -130,29 +274,26 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
       if (result != null) {
         final file = File(result.files.single.path!);
+        String content = await file.readAsString();
 
-        final content = await file.readAsString();
+        final decryptedContent = await _processImportContent(content);
+        if (decryptedContent == null) return;
 
         if (!mounted) return;
-
         final provider = Provider.of<AccountProvider>(context, listen: false);
+        final count = await provider.importAccountsFromText(decryptedContent);
 
-        final count = await provider.importAccountsFromText(content);
-
-        if (mounted) {
-          if (count > 0) {
-            _showSnackBar('Successfully imported $count new accounts');
-          } else {
-            _showSnackBar(
-              'No new accounts added (duplicates or empty)',
-              backgroundColor: Colors.orange,
-            );
-          }
+        if (count > 0) {
+          _showSnackBar('Successfully imported $count new accounts');
+        } else {
+          _showSnackBar(
+            'No new accounts added (duplicates or empty)',
+            backgroundColor: Colors.orange,
+          );
         }
       }
     } catch (e) {
       debugPrint('Import error: $e');
-
       _showSnackBar('Import failed: ${e.toString()}', isError: true);
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -202,13 +343,8 @@ class _ImportExportScreenState extends State<ImportExportScreen>
       if (remotePath.startsWith('/')) remotePath = remotePath.substring(1);
       if (remotePath.isNotEmpty && !remotePath.endsWith('/')) remotePath += '/';
 
-      final provider = Provider.of<AccountProvider>(context, listen: false);
-      final text = provider.exportAccountsToText();
-
-      if (text.isEmpty) {
-        _showSnackBar('No accounts to upload');
-        return;
-      }
+      final exportData = await _prepareExportContent();
+      if (exportData == null) return;
 
       final fullUrl = '$baseUrl$remotePath$_fixedFileName';
       final fileUri = Uri.parse(fullUrl);
@@ -217,7 +353,7 @@ class _ImportExportScreenState extends State<ImportExportScreen>
       final response = await http.put(
         fileUri,
         headers: {'Authorization': basicAuth, 'Content-Type': 'text/plain'},
-        body: text,
+        body: exportData.content,
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -237,7 +373,6 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
     try {
       final config = await _getWebDavConfig();
-      if (!mounted) return;
       if (config == null) return;
 
       final url = config['url']!;
@@ -274,18 +409,20 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final content = response.body;
+
+        final decryptedContent = await _processImportContent(content);
+        if (decryptedContent == null) return;
+
         if (!mounted) return;
         final provider = Provider.of<AccountProvider>(context, listen: false);
-        final count = await provider.importAccountsFromText(content);
-        if (mounted) {
-          if (count > 0) {
-            _showSnackBar('Successfully synced $count new accounts');
-          } else {
-            _showSnackBar(
-              'Already up to date. No new accounts found in Cloud.',
-              backgroundColor: Colors.orange,
-            );
-          }
+        final count = await provider.importAccountsFromText(decryptedContent);
+        if (count > 0) {
+          _showSnackBar('Successfully synced $count new accounts');
+        } else {
+          _showSnackBar(
+            'Already up to date. No new accounts found in Cloud.',
+            backgroundColor: Colors.orange,
+          );
         }
       } else {
         throw Exception('Status ${response.statusCode}: ${response.body}');
