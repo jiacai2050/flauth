@@ -1,74 +1,74 @@
-# Flauth 身份验证架构说明
+# Flauth Authentication Architecture
 
-本文档详细描述了 Flauth 的安全实现机制，包括 PIN 码保护、生物识别集成及其交互逻辑。
+This document details the security implementation mechanisms of Flauth, including PIN protection, biometric integration, and interaction logic.
 
-## 1. 核心安全策略：双重防护 (Two-Tier Protection)
+## 1. Core Security Strategy: Two-Tier Protection
 
-Flauth 采用的是**应用级独立验证**结合**系统级生物识别**的方案。
+Flauth employs a **Application-Level Independent Authentication** combined with **System-Level Biometrics**.
 
-*   **一级验证（生物识别）**：利用 `local_auth` 插件调用 iOS (FaceID/TouchID) 或 Android (指纹/人脸)。
-    *   **Android 实现**：宿主 Activity 继承自 `FlutterFragmentActivity`，并应用 `Theme.MaterialComponents` 主题，以确保对系统级 `BiometricPrompt` 的完美兼容。
-*   **二级验证（自定义 PIN 码）**：由应用自身维护的 4 位数字密码。这是**核心兜底机制**，建立了独立的防御边界。
+*   **Tier 1 (Biometrics)**: Uses the `local_auth` plugin to invoke iOS (FaceID/TouchID) or Android (Fingerprint/Face).
+    *   **Android Implementation**: The host Activity extends `FlutterFragmentActivity` and applies the `Theme.MaterialComponents` theme to ensure perfect compatibility with the system-level `BiometricPrompt`.
+*   **Tier 2 (Custom PIN)**: A 4-digit numeric password maintained by the application itself. This is the **core fallback mechanism**, establishing an independent defense boundary.
 
-## 2. 存储设计 (Storage Service)
+## 2. Storage Design (Storage Service)
 
-所有敏感信息均存储在 `flutter_secure_storage` 中（Android 端使用加密的 Shared Preferences/Keystore，iOS 端使用 Keychain）：
+All sensitive information is stored in `flutter_secure_storage` (using encrypted Shared Preferences/Keystore on Android and Keychain on iOS):
 
-*   **auth_pin**: 存储用户设置的 PIN 码。
-*   **auth_biometric_enabled**: 布尔值，标记用户是否授权使用生物识别。
-*   **auth_failed_attempts**: 连续输入错误的次数。
-*   **auth_lockout_end**: 锁定结束的 ISO8601 时间戳。
-*   **auth_pin_skipped**: 标记用户是否选择了跳过初始设置。
+*   **auth_pin**: Stores the user-set PIN.
+*   **auth_biometric_enabled**: Boolean, marks whether the user has authorized biometric use.
+*   **auth_failed_attempts**: Number of consecutive incorrect entries.
+*   **auth_lockout_end**: ISO8601 timestamp for when the lockout ends.
+*   **auth_pin_skipped**: Marks whether the user chose to skip the initial setup.
 
-## 3. 身份验证流程
+## 3. Authentication Flow
 
-### 3.1 启动与生命周期管理
-1.  **初始化**：`AuthProvider` 检查 `auth_pin` 存在性及锁定状态。
-2.  **锁定检查**：若当前时间早于 `auth_lockout_end`，则 UI 禁用输入并显示倒计时。
-3.  **自动识别**：若未被锁定且开启了生物识别，`AuthScreen` 在首帧渲染后自动弹出验证框。
-4.  **后台自动锁定**：
-    *   应用进入后台时，会记录当前时间戳。
-    *   应用恢复前台时，会检查离开时长。若离开超过 **30 秒（Grace Period）**，应用将强制切回未授权状态，要求重新验证。
+### 3.1 Startup & Lifecycle Management
+1.  **Initialization**: `AuthProvider` checks the existence of `auth_pin` and the lockout status.
+2.  **Lock Check**: If the current time is earlier than `auth_lockout_end`, the UI disables input and shows a countdown.
+3.  **Auto-Auth**: If not locked and biometrics are enabled, `AuthScreen` automatically pops up the verification dialog after the first frame is rendered.
+4.  **Background Auto-Lock**:
+    *   When the app enters the background, the current timestamp is recorded.
+    *   When the app returns to the foreground, it checks the duration of absence. If the absence exceeds the **30-second Grace Period**, the app forces a switch back to the unauthorized state, requiring re-authentication.
 
-### 3.2 验证路径与防爆破
+### 3.2 Verification Path & Anti-Brute Force
 ```mermaid
 graph TD
-    A[进入 AuthScreen] --> L{检查锁定状态?}
-    L -- 已锁定 --> M[显示倒计时/禁用输入]
-    M --> |倒计时结束| L
-    L -- 未锁定 --> B{生物识别开启?}
-    B -- 是 --> C[弹出 FaceID/指纹]
-    C -- 成功 --> D[解锁进入 HomeScreen]
-    C -- 失败/取消 --> E[等待手动输入 PIN]
-    B -- 否 --> E
-    E --> F{输入 PIN 匹配?}
-    F -- 是 --> D
-    F -- 否 --> G[失败次数 +1]
-    G --> H{失败满 5 次?}
-    H -- 是 --> I[设置 30s 锁定]
+    A[Enter AuthScreen] --> L{Check Lock Status?}
+    L -- Locked --> M[Show Countdown/Disable Input]
+    M --> |Countdown Ends| L
+    L -- Not Locked --> B{Biometrics Enabled?}
+    B -- Yes --> C[Show FaceID/Fingerprint]
+    C -- Success --> D[Unlock to HomeScreen]
+    C -- Failure/Cancel --> E[Wait for Manual PIN]
+    B -- No --> E
+    E --> F{PIN Matches?}
+    F -- Yes --> D
+    F -- No --> G[Fail Count +1]
+    G --> H{Fail >= 5?}
+    H -- Yes --> I[Set 30s Lockout]
     I --> L
-    H -- 否 --> J[显示剩余机会/震动提示]
+    H -- No --> J[Show Remaining/Vibrate]
     J --> E
 ```
 
-## 4. 平台兼容性
+## 4. Platform Compatibility
 
 *   **Android**:
-    *   **最低支持版本**: Android 9.0 (SDK 28)。
-    *   **构建配置**: 采用 Java 11 与 Kotlin 现代编译器配置。
-    *   **主题方案**: 采用 Material Components 主题架构（`LaunchTheme` 与 `NormalTheme` 均继承自 `Theme.MaterialComponents`），确保指纹识别对话框在各品牌手机上的样式一致性与稳定性。
+    *   **Minimum Supported Version**: Android 9.0 (SDK 28).
+    *   **Build Config**: Uses Java 11 and modern Kotlin compiler configuration.
+    *   **Theming**: Uses Material Components theme architecture (`LaunchTheme` and `NormalTheme` both extend `Theme.MaterialComponents`) to ensure consistent and stable fingerprint dialog styles across various device brands.
 *   **iOS**:
-    *   使用标准的 FaceID/TouchID 认证。
-*   **桌面端**:
-    *   目前仅支持 PIN 码验证。
+    *   Uses standard FaceID/TouchID authentication.
+*   **Desktop**:
+    *   Currently only supports PIN authentication.
 
-## 5. 安全特性
+## 5. Security Features
 
-*   **隔离性**：不复用手机锁屏密码，即使手机密码泄露，2FA 令牌依然安全。
-*   **防爆破 (Anti-Brute Force)**：连续 5 次错误输入强制锁定 30 秒，锁定状态持久化，重启应用无法重置。
-*   **防泄露**：`AuthScreen` 作为遮罩，验证通过前内存中不解密 TOTP 密钥。
-*   **生命周期感知**：通过 `WidgetsBindingObserver` 实时监听应用状态，防止应用切到后台后内容被窥视。
+*   **Isolation**: Does not reuse the phone's lock screen password. Even if the phone password is compromised, the 2FA tokens remain secure.
+*   **Anti-Brute Force**: 5 consecutive incorrect entries force a 30-second lockout. The lockout state is persisted and cannot be reset by restarting the app.
+*   **Leak Prevention**: `AuthScreen` acts as an overlay; TOTP secrets are not decrypted in memory until verification passes.
+*   **Lifecycle Awareness**: Uses `WidgetsBindingObserver` to monitor app state in real-time, preventing content from being viewed when the app is in the background.
 
-## 6. 设计权衡 (Design Trade-offs)
+## 6. Design Trade-offs
 
-我们选择了“自定义 PIN”而非“复用系统密码”，是为了应对“手机在解锁状态下被抢夺/借用”的风险。虽然这增加了用户的记忆负担，但对于管理账户登录权的验证器应用来说，安全性是第一优先级的。同时，通过引入 **30 秒后台宽限期**，平衡了安全性和频繁切换应用的易用性。
+We chose a "Custom PIN" over "Reusing System Password" to address the risk of "Phone being snatched/borrowed while unlocked". Although this increases the memory burden on the user, for an authenticator app managing account access rights, security is the primary priority. At the same time, the introduction of the **30-second background grace period** balances security with the usability of frequent app switching.
