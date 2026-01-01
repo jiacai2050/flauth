@@ -10,6 +10,7 @@ class AuthProvider with ChangeNotifier {
 
   AuthStatus _status = AuthStatus.unknown;
   bool _isBiometricEnabled = false;
+  bool _isUsePinForBackupEnabled = false;
   bool _hasPin = false;
   DateTime? _lockoutEndTime;
   DateTime? _backgroundTime; // Track when app went to background
@@ -17,6 +18,7 @@ class AuthProvider with ChangeNotifier {
 
   AuthStatus get status => _status;
   bool get isBiometricEnabled => _isBiometricEnabled;
+  bool get isUsePinForBackupEnabled => _isUsePinForBackupEnabled;
   bool get hasPin => _hasPin;
   DateTime? get lockoutEndTime => _lockoutEndTime;
   int get failedAttempts => _failedAttempts;
@@ -28,6 +30,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> _initAuth() async {
     _hasPin = await _storageService.hasPin();
     _isBiometricEnabled = await _storageService.isBiometricEnabled();
+    _isUsePinForBackupEnabled = await _storageService.isUsePinForBackup();
     _failedAttempts = await _storageService.getFailedAttempts();
     _lockoutEndTime = await _storageService.getLockoutEndTime();
 
@@ -126,6 +129,19 @@ class AuthProvider with ChangeNotifier {
     await _storageService.setBiometricEnabled(enabled);
     _isBiometricEnabled = enabled;
     notifyListeners();
+  }
+
+  Future<void> toggleUsePinForBackup(bool enabled) async {
+    await _storageService.setUsePinForBackup(enabled);
+    _isUsePinForBackupEnabled = enabled;
+    notifyListeners();
+  }
+
+  /// Gets the PIN to be used as a backup password.
+  /// Returns null if PIN is not set.
+  Future<String?> getBackupPassword() async {
+    if (!_hasPin) return null;
+    return await _storageService.getPin();
   }
 
   Future<bool> shouldShowSetupPrompt() async {

@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import '../providers/account_provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/backup_security_service.dart';
 import 'webdav_config_screen.dart';
 
@@ -66,16 +67,29 @@ class _ImportExportScreenState extends State<ImportExportScreen>
   // --- Unified Security Logic ---
 
   Future<ExportData?> _prepareExportContent() async {
-    final provider = Provider.of<AccountProvider>(context, listen: false);
-    final rawText = provider.exportAccountsToText();
+    final accountProvider = Provider.of<AccountProvider>(
+      context,
+      listen: false,
+    );
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final rawText = accountProvider.exportAccountsToText();
 
     if (rawText.isEmpty) {
       _showSnackBar('No accounts to export');
       return null;
     }
 
-    // Ask for encryption
-    final password = await _showSetPasswordDialog();
+    String? password;
+    bool usingAppPin = false;
+
+    if (authProvider.isUsePinForBackupEnabled && authProvider.hasPin) {
+      password = await authProvider.getBackupPassword();
+      usingAppPin = true;
+    } else {
+      // Ask for encryption
+      password = await _showSetPasswordDialog();
+    }
+
     if (!mounted) return null;
     if (password == null) {
       // User cancelled
@@ -89,6 +103,9 @@ class _ImportExportScreenState extends State<ImportExportScreen>
       // Encrypt
       try {
         finalContent = BackupSecurityService.encrypt(rawText, password);
+        if (usingAppPin) {
+          _showSnackBar('Encrypted with App PIN');
+        }
       } catch (e) {
         _showSnackBar('Encryption failed: $e', isError: true);
         return null;
@@ -100,6 +117,22 @@ class _ImportExportScreenState extends State<ImportExportScreen>
   Future<String?> _processImportContent(String content) async {
     // Check encryption
     if (BackupSecurityService.isEncrypted(content)) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      // Try with App PIN first if enabled
+      if (authProvider.isUsePinForBackupEnabled && authProvider.hasPin) {
+        final pin = await authProvider.getBackupPassword();
+        if (pin != null) {
+          try {
+            return BackupSecurityService.decrypt(content, pin);
+          } catch (_) {
+            // Decryption with PIN failed, maybe it was a custom password?
+            // Fall through to manual password dialog
+          }
+        }
+      }
+
+      if (!mounted) return null;
       final password = await _showEnterPasswordDialog();
       if (!mounted) return null;
       if (password == null) {

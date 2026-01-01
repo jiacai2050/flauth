@@ -1,6 +1,9 @@
 
 
 fmt:
+	dart format --set-exit-if-changed lib
+
+fix:
 	dart format lib
 
 lint:
@@ -9,4 +12,4 @@ lint:
 test:
 	flutter test
 
-.PHONY: fmt lint test
+.PHONY: fmt lint test fix
