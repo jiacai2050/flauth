@@ -13,6 +13,7 @@ It provides a simple and lightweight solution for managing your 2FA (Two-Factor 
   - **Local Backup**: Export/Import accounts as standard text files using system file pickers.
   - **WebDAV Sync**: Seamlessly sync your data with your private cloud (Nextcloud, Nutstore, etc.) using a robust single-file sync approach with custom path support.
 - **Privacy & Security**:
+  - **Security Architecture**: Detailed [security implementation and authentication strategies](./docs/auth.md).
   - **Encrypted Storage**: Secrets are encrypted and stored in the device's secure element (Keychain on iOS/macOS, Keystore on Android).
   - **Granular Storage**: Implements "One Key Per Account" architecture for maximum reliability and scalability.
 - **Modern UI**: Focused on simplicity. Built with Material 3, supporting adaptive light and dark modes.
@@ -22,7 +23,8 @@ It provides a simple and lightweight solution for managing your 2FA (Two-Factor 
 ![](assets/backup-local.png)
 ![](assets/backup-webdav.png)
 ![](assets/account-two.png)
-**Easy Management**: Tap to copy, swipe to delete with confirmation.
+
+**Easy Management**: Tap to copy, swipe to delete with confirmation, long press to reorder.
 
 ## ⬇️ Download
 
