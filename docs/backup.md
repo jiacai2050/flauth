@@ -23,7 +23,9 @@ To ensure the safety of your 2FA secrets, Flauth provides industry-standard encr
 
 ### 2.2 File Formats
 
-#### Encrypted Format (.flauth)
+Flauth unifies all backup files with the `.flauth` extension. The app automatically detects whether the file is encrypted or plain text during the import process.
+
+#### Encrypted Format
 Encrypted backups are stored as a JSON container:
 ```json
 {
@@ -41,8 +43,8 @@ Encrypted backups are stored as a JSON container:
 }
 ```
 
-#### Plain Text Format (.txt)
-If the user chooses to skip encryption, accounts are exported as a simple list of `otpauth://` URIs, one per line.
+#### Plain Text Format
+If the user chooses to skip encryption, accounts are exported as a simple list of `otpauth://` URIs, one per line (still saved with the `.flauth` extension).
 
 ## 3. Workflows
 
@@ -52,7 +54,7 @@ If the user chooses to skip encryption, accounts are exported as a simple list o
 3.  **Encryption**: If a password is provided, derive a 256-bit key and encrypt the content.
 4.  **Save/Upload**: 
     *   **Local**: Use the system file picker to save the `.flauth` (encrypted) or `.txt` (plain) file.
-    *   **WebDAV**: Upload the content to the configured remote path (defaults to `flauth_backup.txt`).
+    *   **WebDAV**: Upload the content to the configured remote path (defaults to `flauth_backup.flauth`).
 
 ### 3.2 Import Workflow
 1.  **Read Content**: Load the file string from local storage or download from WebDAV.

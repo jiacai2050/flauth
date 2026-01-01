@@ -172,13 +172,12 @@ class _ImportExportScreenState extends State<ImportExportScreen>
     }
 
     String finalContent = rawText;
-    String extension = 'txt';
+    String extension = 'flauth';
 
     if (password.isNotEmpty) {
       // Encrypt
       try {
         finalContent = BackupSecurityService.encrypt(rawText, password);
-        extension = 'flauth';
       } catch (e) {
         _showSnackBar('Encryption failed: $e', isError: true);
         return null;
@@ -269,7 +268,8 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
+        type: FileType.custom,
+        allowedExtensions: ['flauth'],
       );
 
       if (result != null) {
@@ -303,7 +303,7 @@ class _ImportExportScreenState extends State<ImportExportScreen>
   // WebDAV Handlers
 
   // Use a fixed filename for sync-like behavior
-  final String _fixedFileName = 'flauth_backup.txt';
+  final String _fixedFileName = 'flauth_backup.flauth';
 
   Future<Map<String, String>?> _getWebDavConfig() async {
     final provider = Provider.of<AccountProvider>(context, listen: false);
