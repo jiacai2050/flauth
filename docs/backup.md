@@ -17,7 +17,7 @@ To ensure the safety of your 2FA secrets, Flauth provides industry-standard encr
 ### 2.1 Encryption Standard
 *   **Algorithm**: AES-256-CBC (Advanced Encryption Standard).
 *   **Key Derivation**: PBKDF2 (Password-Based Key Derivation Function 2) with HMAC-SHA256.
-*   **Iterations**: 600,000 rounds (provides high resistance against brute-force attacks).
+*   **Iterations**: 10,000 rounds (balances performance and security).
 *   **Salting**: A unique 16-byte random salt is generated for every backup to prevent rainbow table attacks.
 *   **IV**: A 16-byte random Initialization Vector is used for every encryption to ensure uniqueness.
 
@@ -32,7 +32,7 @@ Encrypted backups are stored as a JSON container:
   "version": 1,
   "kdf": {
     "algorithm": "pbkdf2",
-    "iterations": 600000,
+    "iterations": 10000,
     "salt": "<Base64 encoded salt>"
   },
   "encryption": {

@@ -62,7 +62,7 @@ class AboutScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               const Text(
-                'A secure, open-source TOTP authenticator built with Flutter.',
+                'A privacy-first, fully open-source TOTP authenticator for Android, macOS, Windows, and Linux.',
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),

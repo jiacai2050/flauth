@@ -48,107 +48,18 @@ class _ImportExportScreenState extends State<ImportExportScreen>
   // --- Helper Dialogs ---
 
   Future<String?> _showSetPasswordDialog() async {
-    final passCtrl = TextEditingController();
-    final confirmCtrl = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-
     return showDialog<String>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Encrypt Backup?'),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Protect your backup with a password. If you lose this password, you cannot restore your accounts.',
-                style: TextStyle(fontSize: 13, color: Colors.grey),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: passCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true,
-                validator: (val) =>
-                    (val == null || val.length < 6)
-                        ? 'Min 6 characters'
-                        : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: confirmCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Confirm Password',
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true,
-                validator: (val) =>
-                    val != passCtrl.text ? 'Passwords do not match' : null,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context), // Cancel export
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, ''), // Skip encryption
-            child: const Text('Skip (Plain Text)'),
-          ),
-          FilledButton(
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                Navigator.pop(context, passCtrl.text);
-              }
-            },
-            child: const Text('Encrypt'),
-          ),
-        ],
-      ),
+      builder: (context) => const _SetPasswordDialog(),
     );
   }
 
   Future<String?> _showEnterPasswordDialog() async {
-    final passCtrl = TextEditingController();
     return showDialog<String>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Decrypt Backup'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('This file is encrypted. Please enter the password.'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
-              autofocus: true,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, passCtrl.text),
-            child: const Text('Unlock'),
-          ),
-        ],
-      ),
+      builder: (context) => const _EnterPasswordDialog(),
     );
   }
 
@@ -606,6 +517,136 @@ class _ImportExportScreenState extends State<ImportExportScreen>
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SetPasswordDialog extends StatefulWidget {
+  const _SetPasswordDialog();
+
+  @override
+  State<_SetPasswordDialog> createState() => _SetPasswordDialogState();
+}
+
+class _SetPasswordDialogState extends State<_SetPasswordDialog> {
+  final _passCtrl = TextEditingController();
+  final _confirmCtrl = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _passCtrl.dispose();
+    _confirmCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Encrypt Backup?'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Protect your backup with a password. If you lose this password, you cannot restore your accounts.',
+              style: TextStyle(fontSize: 13, color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _passCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
+              obscureText: true,
+              validator:
+                  (val) => (val == null || val.length < 6) ? 'Min 6 characters' : null,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _confirmCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Confirm Password',
+                border: OutlineInputBorder(),
+              ),
+              obscureText: true,
+              validator:
+                  (val) => val != _passCtrl.text ? 'Passwords do not match' : null,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context), // Cancel export
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, ''), // Skip encryption
+          child: const Text('Skip (Plain Text)'),
+        ),
+        FilledButton(
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {
+              Navigator.pop(context, _passCtrl.text);
+            }
+          },
+          child: const Text('Encrypt'),
+        ),
+      ],
+    );
+  }
+}
+
+class _EnterPasswordDialog extends StatefulWidget {
+  const _EnterPasswordDialog();
+
+  @override
+  State<_EnterPasswordDialog> createState() => _EnterPasswordDialogState();
+}
+
+class _EnterPasswordDialogState extends State<_EnterPasswordDialog> {
+  final _passCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _passCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Decrypt Backup'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('This file is encrypted. Please enter the password.'),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _passCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Password',
+              border: OutlineInputBorder(),
+            ),
+            obscureText: true,
+            autofocus: true,
+            onSubmitted: (_) => Navigator.pop(context, _passCtrl.text),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _passCtrl.text),
+          child: const Text('Unlock'),
+        ),
+      ],
     );
   }
 }
