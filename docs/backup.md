@@ -53,7 +53,7 @@ If the user chooses to skip encryption, accounts are exported as a simple list o
 2.  **Security Choice**: Prompt the user to enter a password (minimum 6 characters) or skip encryption.
 3.  **Encryption**: If a password is provided, derive a 256-bit key and encrypt the content.
 4.  **Save/Upload**: 
-    *   **Local**: Use the system file picker to save the `.flauth` (encrypted) or `.txt` (plain) file.
+    *   **Local**: Use the system file picker to save the `.flauth` file (encrypted or plain text).
     *   **WebDAV**: Upload the content to the configured remote path (defaults to `flauth_backup.flauth`).
 
 ### 3.2 Import Workflow
