@@ -31,8 +31,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Analyze
-        run: flutter analyze
+      - name: Run formatter
+        run: |
+          make fmt
+
+      - name: Run linter
+        run: |
+          make lint
 
       - name: Run tests
-        run: flutter test
+        run: |
+          make test

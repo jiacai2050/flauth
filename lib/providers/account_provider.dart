@@ -110,36 +110,37 @@ class AccountProvider with ChangeNotifier {
 
   /// Imports accounts from a text string (one URI per line).
   /// Returns the number of NEW accounts successfully imported.
-    Future<int> importAccountsFromText(String text) async {
-      int count = 0;
-      final lines = text.split('\n');
-      final List<Account> newAccounts = [];
-  
-      for (var line in lines) {
-        if (line.trim().isEmpty) continue;
-        try {
-          final uri = Uri.parse(line.trim());
-          final account = Account.fromUri(uri);
-          
-          // Check for duplicates based on secret
-          if (!_accounts.any((a) => a.secret == account.secret)) {
-            _accounts.add(account);
-            newAccounts.add(account);
-            count++;
-          }
-        } catch (e) {
-          // Skip invalid lines
-          debugPrint('Skipping invalid line: $line ($e)');
+  Future<int> importAccountsFromText(String text) async {
+    int count = 0;
+    final lines = text.split('\n');
+    final List<Account> newAccounts = [];
+
+    for (var line in lines) {
+      if (line.trim().isEmpty) continue;
+      try {
+        final uri = Uri.parse(line.trim());
+        final account = Account.fromUri(uri);
+
+        // Check for duplicates based on secret
+        if (!_accounts.any((a) => a.secret == account.secret)) {
+          _accounts.add(account);
+          newAccounts.add(account);
+          count++;
         }
+      } catch (e) {
+        // Skip invalid lines
+        debugPrint('Skipping invalid line: $line ($e)');
       }
-      
-      if (newAccounts.isNotEmpty) {
-        // Only save the newly added accounts
-        await _storageService.saveAccounts(newAccounts);
-        notifyListeners();
-      }
-      return count;
     }
+
+    if (newAccounts.isNotEmpty) {
+      // Only save the newly added accounts
+      await _storageService.saveAccounts(newAccounts);
+      notifyListeners();
+    }
+    return count;
+  }
+
   /// Generates the current 6-digit TOTP code for a given secret.
   String getCurrentCode(String secret) {
     try {

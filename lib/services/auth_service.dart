@@ -18,11 +18,12 @@ class AuthService {
       final bool isDeviceSupported = await _auth.isDeviceSupported();
 
       if (!canCheckBiometrics || !isDeviceSupported) {
-        return true; 
+        return true;
       }
 
       return await _auth.authenticate(
         localizedReason: 'Please authenticate to access Flauth',
+        biometricOnly: true, // Force fail if biometrics cancelled/failed
       );
     } on PlatformException {
       // Biometrics not available or other error

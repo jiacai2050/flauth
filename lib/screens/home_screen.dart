@@ -1,13 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/account_provider.dart';
+import '../providers/auth_provider.dart';
 import '../widgets/account_tile.dart';
 import 'scan_qr_screen.dart';
 import 'import_export_screen.dart';
 import 'about_screen.dart';
+import 'security_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkSecuritySetup());
+  }
+
+  Future<void> _checkSecuritySetup() async {
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    if (await auth.shouldShowSetupPrompt()) {
+      if (!mounted) return;
+      _showSetupDialog(auth);
+    }
+  }
+
+  void _showSetupDialog(AuthProvider auth) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Protect your accounts'),
+        content: const Text(
+          'It is highly recommended to set up a PIN to secure your 2FA tokens. Would you like to do it now?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              auth.skipSetupPrompt();
+              Navigator.of(context).pop();
+            },
+            child: const Text('Later'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const SecurityScreen()),
+              );
+            },
+            child: const Text('Setup Now'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

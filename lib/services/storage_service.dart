@@ -9,6 +9,11 @@ import '../models/account.dart';
 class StorageService {
   final _storage = const FlutterSecureStorage();
   static const _keyWebDavConfig = 'webdav_config';
+  static const _keyPin = 'auth_pin';
+  static const _keyBiometricEnabled = 'auth_biometric_enabled';
+  static const _keyPinSkipped = 'auth_pin_skipped';
+  static const _keyFailedAttempts = 'auth_failed_attempts';
+  static const _keyLockoutEnd = 'auth_lockout_end';
   static const _accountPrefix = 'account_';
 
   /// Retrieves the list of accounts from secure storage.
@@ -29,6 +34,66 @@ class StorageService {
     });
 
     return accounts;
+  }
+
+  // --- Auth & PIN ---
+
+  Future<void> savePin(String pin) async {
+    await _storage.write(key: _keyPin, value: pin);
+  }
+
+  Future<String?> getPin() async {
+    return await _storage.read(key: _keyPin);
+  }
+
+  Future<bool> hasPin() async {
+    return await _storage.containsKey(key: _keyPin);
+  }
+
+  Future<void> deletePin() async {
+    await _storage.delete(key: _keyPin);
+  }
+
+  Future<void> setBiometricEnabled(bool enabled) async {
+    await _storage.write(key: _keyBiometricEnabled, value: enabled.toString());
+  }
+
+  Future<bool> isBiometricEnabled() async {
+    final val = await _storage.read(key: _keyBiometricEnabled);
+    return val == 'true';
+  }
+
+  Future<void> setPinSetupSkipped() async {
+    await _storage.write(key: _keyPinSkipped, value: 'true');
+  }
+
+  Future<bool> isPinSetupSkipped() async {
+    final val = await _storage.read(key: _keyPinSkipped);
+    return val == 'true';
+  }
+
+  // --- Lockout Logic ---
+
+  Future<int> getFailedAttempts() async {
+    final val = await _storage.read(key: _keyFailedAttempts);
+    return val != null ? int.parse(val) : 0;
+  }
+
+  Future<void> setFailedAttempts(int attempts) async {
+    await _storage.write(key: _keyFailedAttempts, value: attempts.toString());
+  }
+
+  Future<DateTime?> getLockoutEndTime() async {
+    final val = await _storage.read(key: _keyLockoutEnd);
+    return val != null ? DateTime.parse(val) : null;
+  }
+
+  Future<void> setLockoutEndTime(DateTime? time) async {
+    if (time == null) {
+      await _storage.delete(key: _keyLockoutEnd);
+    } else {
+      await _storage.write(key: _keyLockoutEnd, value: time.toIso8601String());
+    }
   }
 
   /// Saves a single account to its own secure key.
