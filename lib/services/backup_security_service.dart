@@ -51,9 +51,10 @@ class BackupSecurityService {
   static String decrypt(String jsonString, String password) {
     try {
       final Map<String, dynamic> container = jsonDecode(jsonString);
-      
+
       // Basic validation
-      if (!container.containsKey('encryption') || !container.containsKey('kdf')) {
+      if (!container.containsKey('encryption') ||
+          !container.containsKey('kdf')) {
         throw const FormatException('Invalid backup format');
       }
 
@@ -120,7 +121,7 @@ class BackupSecurityService {
     // PBKDF2 with HMAC-SHA256
     final derivator = pc.PBKDF2KeyDerivator(pc.HMac(pc.SHA256Digest(), 64));
     final params = pc.Pbkdf2Parameters(salt, iterations, _keyLength);
-    
+
     derivator.init(params);
     return derivator.process(utf8.encode(password));
   }

@@ -561,8 +561,8 @@ class _SetPasswordDialogState extends State<_SetPasswordDialog> {
                 border: OutlineInputBorder(),
               ),
               obscureText: true,
-              validator:
-                  (val) => (val == null || val.length < 6) ? 'Min 6 characters' : null,
+              validator: (val) =>
+                  (val == null || val.length < 6) ? 'Min 6 characters' : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -572,8 +572,8 @@ class _SetPasswordDialogState extends State<_SetPasswordDialog> {
                 border: OutlineInputBorder(),
               ),
               obscureText: true,
-              validator:
-                  (val) => val != _passCtrl.text ? 'Passwords do not match' : null,
+              validator: (val) =>
+                  val != _passCtrl.text ? 'Passwords do not match' : null,
             ),
           ],
         ),
