@@ -373,6 +373,7 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
     try {
       final config = await _getWebDavConfig();
+      if (!mounted) return;
       if (config == null) return;
 
       final url = config['url']!;
