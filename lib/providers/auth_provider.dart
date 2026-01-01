@@ -151,7 +151,9 @@ class AuthProvider with ChangeNotifier {
   void checkLock({int timeoutSeconds = 30}) {
     if (_backgroundTime != null && _hasPin) {
       final diff = DateTime.now().difference(_backgroundTime!).inSeconds;
-      debugPrint('App resumed. Background duration: ${diff}s. Timeout: ${timeoutSeconds}s');
+      debugPrint(
+        'App resumed. Background duration: ${diff}s. Timeout: ${timeoutSeconds}s',
+      );
       if (diff > timeoutSeconds) {
         debugPrint('Locking app due to timeout.');
         _status = AuthStatus.unauthenticated;

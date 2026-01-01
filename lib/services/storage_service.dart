@@ -57,7 +57,7 @@ class StorageService {
 
     // 4. Append any remaining accounts (newly found or not in order list)
     accounts.addAll(accountMap.values);
-    
+
     return accounts;
   }
 
@@ -68,7 +68,6 @@ class StorageService {
       debugPrint('Error saving account order: $e');
     }
   }
-
 
   // --- Auth & PIN ---
 

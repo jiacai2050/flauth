@@ -137,7 +137,9 @@ class _HomeScreenState extends State<HomeScreen> {
             itemBuilder: (context, index) {
               final account = provider.accounts[index];
               return Container(
-                key: ValueKey(account.id), // Key is required for ReorderableListView
+                key: ValueKey(
+                  account.id,
+                ), // Key is required for ReorderableListView
                 child: AccountTile(account: account),
               );
             },

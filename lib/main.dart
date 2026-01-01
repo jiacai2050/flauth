@@ -73,7 +73,7 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final auth = Provider.of<AuthProvider>(context, listen: false);
-    
+
     if (state == AppLifecycleState.paused) {
       // App entered background: record timestamp
       auth.markBackground();

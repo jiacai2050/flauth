@@ -56,7 +56,7 @@ class _ImportExportScreenState extends State<ImportExportScreen>
       final now = DateTime.now();
 
       final fileName =
-          'flauth_backup_${DateFormat('yyyyMMdd_HHmmss').format(now)}.txt';
+          'flauth-${DateFormat('yyyyMMdd-HHmmss').format(now)}.txt';
 
       if (Platform.isAndroid) {
         // Android: Use System "Save As" dialog via SAF (Storage Access Framework)

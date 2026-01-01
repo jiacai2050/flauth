@@ -85,9 +85,9 @@ class AccountProvider with ChangeNotifier {
     }
     final Account item = _accounts.removeAt(oldIndex);
     _accounts.insert(newIndex, item);
-    
+
     notifyListeners(); // Update UI immediately
-    
+
     // Save in background, don't await to avoid UI blocking or lifecycle race conditions
     _saveOrder().catchError((e) => debugPrint('Error saving order: $e'));
   }
