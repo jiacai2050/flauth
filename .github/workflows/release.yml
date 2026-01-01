@@ -3,8 +3,9 @@ name: Release Build
 on:
   workflow_dispatch:
   pull_request:
-    paths:
-      - ".github/workflows/release.yml"
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
   push:
     tags:
       - "v*"
@@ -31,11 +32,11 @@ jobs:
             artifact_name: flauth-windows-x86_64
             asset_extension: .zip
             asset_content_type: application/zip
-          - os: macos-latest
-            target: macos
-            artifact_name: flauth-macos-universal
-            asset_extension: .zip
-            asset_content_type: application/zip
+          # - os: macos-latest
+          #   target: macos
+          #   artifact_name: flauth-macos-universal
+          #   asset_extension: .zip
+          #   asset_content_type: application/zip
           - os: ubuntu-latest
             target: apk
             artifact_name: flauth-android-universal
