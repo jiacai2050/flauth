@@ -3,8 +3,9 @@ name: Release Build
 on:
   workflow_dispatch:
   pull_request:
-    paths:
-      - ".github/workflows/release.yml"
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
   push:
     tags:
       - "v*"
