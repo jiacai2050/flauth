@@ -129,10 +129,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           }
-          return ListView.builder(
+          return ReorderableListView.builder(
             itemCount: provider.accounts.length,
+            onReorder: (oldIndex, newIndex) {
+              provider.reorderAccounts(oldIndex, newIndex);
+            },
             itemBuilder: (context, index) {
-              return AccountTile(account: provider.accounts[index]);
+              final account = provider.accounts[index];
+              return Container(
+                key: ValueKey(account.id), // Key is required for ReorderableListView
+                child: AccountTile(account: account),
+              );
             },
           );
         },

@@ -12,6 +12,7 @@ class AuthProvider with ChangeNotifier {
   bool _isBiometricEnabled = false;
   bool _hasPin = false;
   DateTime? _lockoutEndTime;
+  DateTime? _backgroundTime; // Track when app went to background
   int _failedAttempts = 0;
 
   AuthStatus get status => _status;
@@ -136,7 +137,32 @@ class AuthProvider with ChangeNotifier {
     await _storageService.setPinSetupSkipped();
   }
 
-  // Lock the app (e.g. on resume)
+  // --- Lifecycle Logic ---
+
+  /// Called when app goes to background
+  void markBackground() {
+    if (_status == AuthStatus.authenticated) {
+      debugPrint('Marking background time: ${DateTime.now()}');
+      _backgroundTime = DateTime.now();
+    }
+  }
+
+  /// Called when app resumes. Locks if time exceeded threshold.
+  void checkLock({int timeoutSeconds = 30}) {
+    if (_backgroundTime != null && _hasPin) {
+      final diff = DateTime.now().difference(_backgroundTime!).inSeconds;
+      debugPrint('App resumed. Background duration: ${diff}s. Timeout: ${timeoutSeconds}s');
+      if (diff > timeoutSeconds) {
+        debugPrint('Locking app due to timeout.');
+        _status = AuthStatus.unauthenticated;
+        notifyListeners();
+      }
+      // Reset background time
+      _backgroundTime = null;
+    }
+  }
+
+  // Lock the app immediately
   void lock() {
     if (_hasPin) {
       _status = AuthStatus.unauthenticated;

@@ -14,27 +14,61 @@ class StorageService {
   static const _keyPinSkipped = 'auth_pin_skipped';
   static const _keyFailedAttempts = 'auth_failed_attempts';
   static const _keyLockoutEnd = 'auth_lockout_end';
+  static const _keyAccountOrder = 'auth_account_order';
   static const _accountPrefix = 'account_';
 
   /// Retrieves the list of accounts from secure storage.
-  /// Each account is stored with its own key prefixed by 'account_'.
+  /// Respects the user-defined order if available.
   Future<List<Account>> getAccounts() async {
     final allItems = await _storage.readAll();
     final List<Account> accounts = [];
+    final Map<String, Account> accountMap = {};
 
+    // 1. Parse all accounts into a map
     allItems.forEach((key, value) {
       if (key.startsWith(_accountPrefix)) {
         try {
-          accounts.add(Account.fromJson(value));
+          final acc = Account.fromJson(value);
+          accountMap[acc.id] = acc;
         } catch (e) {
-          // Ignore corrupted or invalid JSON entries
           debugPrint('Failed to parse account from key $key: $e');
         }
       }
     });
 
+    // 2. Load order
+    final orderJson = await _storage.read(key: _keyAccountOrder);
+    List<String> order = [];
+    if (orderJson != null) {
+      try {
+        order = List<String>.from(json.decode(orderJson));
+      } catch (e) {
+        debugPrint('Failed to parse order: $e');
+      }
+    }
+
+    // 3. Construct ordered list
+    for (var id in order) {
+      if (accountMap.containsKey(id)) {
+        accounts.add(accountMap[id]!);
+        accountMap.remove(id);
+      }
+    }
+
+    // 4. Append any remaining accounts (newly found or not in order list)
+    accounts.addAll(accountMap.values);
+    
     return accounts;
   }
+
+  Future<void> saveAccountOrder(List<String> ids) async {
+    try {
+      await _storage.write(key: _keyAccountOrder, value: json.encode(ids));
+    } catch (e) {
+      debugPrint('Error saving account order: $e');
+    }
+  }
+
 
   // --- Auth & PIN ---
 

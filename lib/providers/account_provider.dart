@@ -66,6 +66,7 @@ class AccountProvider with ChangeNotifier {
     );
     _accounts.add(newAccount);
     await _storageService.saveAccount(newAccount);
+    await _saveOrder();
     notifyListeners();
     return true;
   }
@@ -73,7 +74,27 @@ class AccountProvider with ChangeNotifier {
   Future<void> deleteAccount(String id) async {
     _accounts.removeWhere((a) => a.id == id);
     await _storageService.deleteAccount(id);
+    await _saveOrder();
     notifyListeners();
+  }
+
+  /// Reorders accounts in the list and updates storage.
+  Future<void> reorderAccounts(int oldIndex, int newIndex) async {
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final Account item = _accounts.removeAt(oldIndex);
+    _accounts.insert(newIndex, item);
+    
+    notifyListeners(); // Update UI immediately
+    
+    // Save in background, don't await to avoid UI blocking or lifecycle race conditions
+    _saveOrder().catchError((e) => debugPrint('Error saving order: $e'));
+  }
+
+  Future<void> _saveOrder() async {
+    final ids = _accounts.map((a) => a.id).toList();
+    await _storageService.saveAccountOrder(ids);
   }
 
   /// Adds an account directly (e.g. from URI parsing)
@@ -84,6 +105,7 @@ class AccountProvider with ChangeNotifier {
     }
     _accounts.add(account);
     await _storageService.saveAccount(account);
+    await _saveOrder();
     notifyListeners();
     return true;
   }
@@ -136,6 +158,7 @@ class AccountProvider with ChangeNotifier {
     if (newAccounts.isNotEmpty) {
       // Only save the newly added accounts
       await _storageService.saveAccounts(newAccounts);
+      await _saveOrder();
       notifyListeners();
     }
     return count;

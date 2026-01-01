@@ -6,6 +6,7 @@ import 'screens/home_screen.dart';
 import 'screens/auth_screen.dart';
 
 void main() {
+  debugPrint('=== APP STARTED ===');
   // Required because we use plugins (like secure_storage) before runApp might finish initializing bindings.
   // It ensures the Flutter engine and native channels are ready.
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,8 +50,38 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    
+    if (state == AppLifecycleState.paused) {
+      // App entered background: record timestamp
+      auth.markBackground();
+    } else if (state == AppLifecycleState.resumed) {
+      // App came to foreground: check if we should lock
+      auth.checkLock(timeoutSeconds: 30); // 30 seconds grace period
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
