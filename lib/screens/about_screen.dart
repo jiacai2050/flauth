@@ -79,11 +79,6 @@ class AboutScreen extends StatelessWidget {
                 },
               ),
               const Divider(),
-              const ListTile(
-                leading: Icon(Icons.person),
-                title: Text('Author'),
-                subtitle: Text('Jiacai Liu'),
-              ),
               ListTile(
                 leading: const Icon(Icons.code),
                 title: const Text('GitHub'),
@@ -93,7 +88,7 @@ class AboutScreen extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.email),
-                title: const Text('Contact'),
+                title: const Text('Feedback & Support'),
                 subtitle: const Text('dev@liujiacai.net'),
                 onTap: _launchEmail,
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),

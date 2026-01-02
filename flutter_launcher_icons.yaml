@@ -1,6 +1,6 @@
 # flutter pub run flutter_launcher_icons
 flutter_launcher_icons:
-  image_path: "assets/ic_launcher-web.png"
+  image_path: "assets/playstore.png"
 
   android: "launcher_icon"
   # image_path_android: "assets/icon/icon.png"
@@ -18,17 +18,17 @@ flutter_launcher_icons:
   # desaturate_tinted_to_grayscale_ios: true
   # background_color_ios: "#ffffff"
 
-  # web:
-  #   generate: true
-  #   image_path: "path/to/image.png"
-  #   background_color: "#hexcode"
-  #   theme_color: "#hexcode"
+  web:
+    generate: true
+    image_path: "assets/playstore.png"
+    # background_color: "#hexcode"
+    # theme_color: "#hexcode"
 
   windows:
     generate: true
-    # image_path: "path/to/image.png"
-    # icon_size: 48 # min:48, max:256, default: 48
+    image_path: "assets/playstore.png"
+    icon_size: 48 # min:48, max:256, default: 48
 
   macos:
     generate: true
-    # image_path: "path/to/image.png"
+    image_path: "assets/playstore.png"

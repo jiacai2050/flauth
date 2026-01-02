@@ -1,15 +1,14 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import '../providers/account_provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/backup_security_service.dart';
+import '../services/webdav_service.dart';
 import 'webdav_config_screen.dart';
 
 class ExportData {
@@ -31,12 +30,49 @@ class _ImportExportScreenState extends State<ImportExportScreen>
   late TabController _tabController;
 
   bool _isLoading = false;
+  String? _lastCloudBackupTime;
 
   @override
   void initState() {
     super.initState();
 
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.index == 0 && _lastCloudBackupTime == null) {
+        _fetchLastCloudBackupTime();
+      }
+    });
+
+    // Auto fetch if we start on the first tab
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_tabController.index == 0) _fetchLastCloudBackupTime();
+    });
+  }
+
+  Future<void> _fetchLastCloudBackupTime() async {
+    try {
+      final config = await _getWebDavConfig();
+      if (config == null) return;
+
+      final lastModified = await WebDavService.fetchLastModified(config);
+      if (lastModified != null) {
+        try {
+          final dateTime = HttpDate.parse(lastModified).toLocal();
+          setState(() {
+            _lastCloudBackupTime = DateFormat.yMMMd().add_Hms().format(
+              dateTime,
+            );
+          });
+        } catch (e) {
+          debugPrint('Failed to parse last-modified date: $e');
+          setState(() {
+            _lastCloudBackupTime = lastModified;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Failed to fetch backup time: $e');
+    }
   }
 
   @override
@@ -246,9 +282,6 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
   // WebDAV Handlers
 
-  // Use a fixed filename for sync-like behavior
-  final String _fixedFileName = 'flauth_backup.flauth';
-
   Future<Map<String, String>?> _getWebDavConfig() async {
     final provider = Provider.of<AccountProvider>(context, listen: false);
     final config = await provider.getWebDavConfig();
@@ -271,37 +304,23 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
     try {
       final config = await _getWebDavConfig();
-      if (!mounted) return;
-      if (config == null) return;
-
-      final url = config['url']!;
-      final user = config['username'] ?? '';
-      final pass = config['password'] ?? '';
-
-      // Normalize Base URL: ensure it ends with /
-      String baseUrl = url;
-      if (!baseUrl.endsWith('/')) baseUrl += '/';
-
-      // Normalize Remote Path: ensure it DOES NOT start with /, and ends with /
-      String remotePath = config['path'] ?? '';
-      if (remotePath.startsWith('/')) remotePath = remotePath.substring(1);
-      if (remotePath.isNotEmpty && !remotePath.endsWith('/')) remotePath += '/';
+      if (!mounted || config == null) return;
 
       final exportData = await _prepareExportContent();
       if (exportData == null) return;
 
-      final fullUrl = '$baseUrl$remotePath$_fixedFileName';
-      final fileUri = Uri.parse(fullUrl);
-      final basicAuth = 'Basic ${base64Encode(utf8.encode('$user:$pass'))}';
+      final response = await WebDavService.upload(config, exportData.content);
 
-      final response = await http.put(
-        fileUri,
-        headers: {'Authorization': basicAuth, 'Content-Type': 'text/plain'},
-        body: exportData.content,
-      );
+      if (!mounted) return;
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        _showSnackBar('Uploaded successfully to $fullUrl');
+        _showSnackBar('Uploaded successfully');
+        final accountProvider = Provider.of<AccountProvider>(
+          context,
+          listen: false,
+        );
+        accountProvider.updateLastSyncTime();
+        _fetchLastCloudBackupTime(); // Refresh cloud time
       } else {
         throw Exception('Status ${response.statusCode}: ${response.body}');
       }
@@ -317,52 +336,19 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
     try {
       final config = await _getWebDavConfig();
-      if (!mounted) return;
-      if (config == null) return;
+      if (!mounted || config == null) return;
 
-      final url = config['url']!;
-
-      final user = config['username'] ?? '';
-
-      final pass = config['password'] ?? '';
-
-      // Normalize Base URL: ensure it ends with /
-
-      String baseUrl = url;
-
-      if (!baseUrl.endsWith('/')) baseUrl += '/';
-
-      // Normalize Remote Path: ensure it DOES NOT start with /, and ends with /
-
-      String remotePath = config['path'] ?? '';
-
-      if (remotePath.startsWith('/')) remotePath = remotePath.substring(1);
-
-      if (remotePath.isNotEmpty && !remotePath.endsWith('/')) remotePath += '/';
-
-      final fullUrl = '$baseUrl$remotePath$_fixedFileName';
-
-      final fileUri = Uri.parse(fullUrl);
-
-      final basicAuth = 'Basic ${base64Encode(utf8.encode('$user:$pass'))}';
-
-      final response = await http.get(
-        fileUri,
-
-        headers: {'Authorization': basicAuth},
-      );
+      final response = await WebDavService.download(config);
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final content = response.body;
-
         final decryptedContent = await _processImportContent(content);
-        if (decryptedContent == null) return;
+        if (!mounted || decryptedContent == null) return;
 
-        if (!mounted) return;
         final provider = Provider.of<AccountProvider>(context, listen: false);
         final count = await provider.importAccountsFromText(decryptedContent);
 
-        if (!mounted) return;
+        provider.updateLastSyncTime();
         if (count > 0) {
           _showSnackBar('Successfully synced $count new accounts');
         } else {
@@ -408,18 +394,16 @@ class _ImportExportScreenState extends State<ImportExportScreen>
           controller: _tabController,
 
           tabs: const [
-            Tab(text: 'Local File', icon: Icon(Icons.folder)),
-
             Tab(text: 'WebDAV Cloud', icon: Icon(Icons.cloud)),
+
+            Tab(text: 'Local File', icon: Icon(Icons.folder)),
           ],
         ),
 
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-
             onPressed: _openWebDavConfig,
-
             tooltip: 'WebDAV Settings',
           ),
         ],
@@ -427,8 +411,49 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
       body: TabBarView(
         controller: _tabController,
-
         children: [
+          // WebDAV Tab
+          Consumer<AccountProvider>(
+            builder: (context, provider, _) => _buildActionView(
+              icon: Icons.cloud_sync,
+              title: 'WebDAV Cloud',
+              desc:
+                  'Sync backups with your private cloud (Nextcloud, InfiniCloud etc).',
+              btn1Text: 'Upload to Cloud',
+              btn1Icon: Icons.cloud_upload,
+              btn1Action: _handleWebDavUpload,
+              btn2Text: 'Restore from Cloud',
+              btn2Icon: Icons.cloud_download,
+              btn2Action: _handleWebDavDownload,
+              extra: Padding(
+                padding: const EdgeInsets.only(top: 24),
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: [
+                    if (_lastCloudBackupTime != null)
+                      _buildTimeBadge(
+                        context,
+                        Icons.cloud_done_outlined,
+                        'Cloud',
+                        _lastCloudBackupTime!,
+                      ),
+                    if (provider.lastWebDavSyncTime != null)
+                      _buildTimeBadge(
+                        context,
+                        Icons.sync_alt_outlined,
+                        'Synced',
+                        DateFormat.yMMMd().add_Hms().format(
+                          provider.lastWebDavSyncTime!,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
           // Local Tab
           _buildActionView(
             icon: Icons.sd_storage,
@@ -449,19 +474,39 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
             btn2Action: _handleLocalImport,
           ),
+        ],
+      ),
+    );
+  }
 
-          // WebDAV Tab
-          _buildActionView(
-            icon: Icons.cloud_sync,
-            title: 'WebDAV Cloud',
-            desc:
-                'Sync backups with your private cloud (Nextcloud, InfiniCloud etc).',
-            btn1Text: 'Upload to Cloud',
-            btn1Icon: Icons.cloud_upload,
-            btn1Action: _handleWebDavUpload,
-            btn2Text: 'Restore from Cloud',
-            btn2Icon: Icons.cloud_download,
-            btn2Action: _handleWebDavDownload,
+  Widget _buildTimeBadge(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String time,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 14,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '$label: $time',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -470,22 +515,15 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
   Widget _buildActionView({
     required IconData icon,
-
     required String title,
-
     required String desc,
-
     required String btn1Text,
-
     required IconData btn1Icon,
-
     required VoidCallback btn1Action,
-
     required String btn2Text,
-
     required IconData btn2Icon,
-
     required VoidCallback btn2Action,
+    Widget? extra,
   }) {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -494,44 +532,30 @@ class _ImportExportScreenState extends State<ImportExportScreen>
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
-
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-
           crossAxisAlignment: CrossAxisAlignment.stretch,
-
           children: [
             Icon(icon, size: 80, color: Colors.blueGrey),
-
             const SizedBox(height: 32),
-
             Text(
               title,
-
               textAlign: TextAlign.center,
-
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 8),
-
             Text(
               desc,
-
               textAlign: TextAlign.center,
-
               style: const TextStyle(color: Colors.grey),
             ),
-
+            if (extra != null) extra,
             const SizedBox(height: 48),
 
             FilledButton.icon(
               onPressed: btn1Action,
-
               icon: Icon(btn1Icon),
-
               label: Text(btn1Text),
-
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
@@ -542,9 +566,7 @@ class _ImportExportScreenState extends State<ImportExportScreen>
             OutlinedButton.icon(
               onPressed: btn2Action,
               icon: Icon(btn2Icon),
-
               label: Text(btn2Text),
-
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),

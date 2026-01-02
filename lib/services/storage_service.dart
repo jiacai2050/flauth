@@ -16,6 +16,7 @@ class StorageService {
   static const _keyLockoutEnd = 'auth_lockout_end';
   static const _keyAccountOrder = 'auth_account_order';
   static const _keyUsePinForBackup = 'auth_use_pin_for_backup';
+  static const _keyLastWebDavSyncTime = 'auth_last_webdav_sync_time';
   static const _accountPrefix = 'account_';
 
   /// Retrieves the list of accounts from secure storage.
@@ -113,6 +114,22 @@ class StorageService {
   Future<bool> isUsePinForBackup() async {
     final val = await _storage.read(key: _keyUsePinForBackup);
     return val == 'true';
+  }
+
+  Future<void> setLastWebDavSyncTime(DateTime? time) async {
+    if (time == null) {
+      await _storage.delete(key: _keyLastWebDavSyncTime);
+    } else {
+      await _storage.write(
+        key: _keyLastWebDavSyncTime,
+        value: time.toIso8601String(),
+      );
+    }
+  }
+
+  Future<DateTime?> getLastWebDavSyncTime() async {
+    final val = await _storage.read(key: _keyLastWebDavSyncTime);
+    return val != null ? DateTime.parse(val) : null;
   }
 
   // --- Lockout Logic ---

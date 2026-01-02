@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../providers/account_provider.dart';
+import '../services/webdav_service.dart';
 
 class WebDavConfigScreen extends StatefulWidget {
   const WebDavConfigScreen({super.key});
@@ -23,6 +24,12 @@ class _WebDavConfigScreenState extends State<WebDavConfigScreen> {
   void initState() {
     super.initState();
     _loadConfig();
+    _urlController.addListener(_updatePreview);
+    _pathController.addListener(_updatePreview);
+  }
+
+  void _updatePreview() {
+    setState(() {});
   }
 
   Future<void> _loadConfig() async {
@@ -44,20 +51,13 @@ class _WebDavConfigScreenState extends State<WebDavConfigScreen> {
     final url = _urlController.text.trim();
     final user = _usernameController.text.trim();
     final pass = _passwordController.text.trim();
-    String path = _pathController.text.trim();
-
-    // Ensure path ends with / if not empty
-    if (path.isNotEmpty && !path.endsWith('/')) {
-      path = '$path/';
-    }
-    // Ensure path starts with / if not empty
-    if (path.isNotEmpty && !path.startsWith('/')) {
-      path = '/$path';
-    }
+    final config = {'url': url, 'path': _pathController.text.trim()};
+    final paths = WebDavService.getNormalizedPaths(config);
+    final normalizedPath = paths['remotePath']!;
 
     try {
       final basicAuth = 'Basic ${base64Encode(utf8.encode('$user:$pass'))}';
-      final uri = Uri.parse(url);
+      final uri = Uri.parse(paths['baseUrl']!);
 
       // Use PROPFIND with Depth: 0 to check if the root (or URL) exists/is accessible
       // This is a standard WebDAV check.
@@ -73,7 +73,7 @@ class _WebDavConfigScreenState extends State<WebDavConfigScreen> {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         if (mounted) {
           final provider = Provider.of<AccountProvider>(context, listen: false);
-          await provider.saveWebDavConfig(url, user, pass, path);
+          await provider.saveWebDavConfig(url, user, pass, normalizedPath);
 
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
@@ -96,6 +96,17 @@ class _WebDavConfigScreenState extends State<WebDavConfigScreen> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  String _getFullPathPreview() {
+    final config = {
+      'url': _urlController.text.trim(),
+      'path': _pathController.text.trim(),
+    };
+    if (config['url']!.isEmpty) return 'Please enter server URL';
+
+    final paths = WebDavService.getNormalizedPaths(config);
+    return '${paths['baseUrl']}${paths['remotePath']}${WebDavService.fileName}';
   }
 
   @override
@@ -159,6 +170,43 @@ class _WebDavConfigScreenState extends State<WebDavConfigScreen> {
                     helperText: 'Leave empty for root directory',
                   ),
                 ),
+                const SizedBox(height: 16),
+                // Path Preview
+                if (_urlController.text.isNotEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Full Backup Path Preview:',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        SelectableText(
+                          _getFullPathPreview(),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontFamily: 'monospace',
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 const SizedBox(height: 32),
                 SizedBox(
                   width: double.infinity,
