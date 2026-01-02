@@ -15,6 +15,7 @@ It provides a simple and lightweight solution for managing your 2FA (Two-Factor 
   - **WebDAV Sync**: Seamlessly sync your data with your private cloud (Nextcloud, Nutstore, etc.) using a robust single-file sync approach with custom path support.
 - **Privacy & Security**:
   - **Security Architecture**: Detailed [security implementation and authentication strategies](./docs/auth.md).
+  - **Performance Design**: Detailed [high-frequency UI update optimizations](./docs/perf.md).
   - **Encrypted Storage**: Secrets are encrypted and stored in the device's secure element (Keychain on iOS/macOS, Keystore on Android).
   - **Granular Storage**: Implements "One Key Per Account" architecture for maximum reliability and scalability.
 - **Modern UI**: Focused on simplicity. Built with Material 3, supporting adaptive light and dark modes.
