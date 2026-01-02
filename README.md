@@ -22,11 +22,21 @@ It provides a simple and lightweight solution for managing your 2FA (Two-Factor 
 
 ## 📸 Screenshots
 
-![](assets/backup-local.png)
-![](assets/backup-webdav.png)
-![](assets/account-two.png)
+<img src="assets/homepage.webp" alt="Account List" width="200"/>
+<img src="assets/backup.webp" alt="WebDAV Backup" width="200"/>
+<img src="assets/security.webp" alt="Security Settings" width="200"/>
 
-**Easy Management**: Tap to copy, swipe to delete with confirmation, long press to reorder.
+
+## 📥 Importing from other apps
+
+Migrating to Flauth is easy thanks to its support for standard `otpauth://` URIs:
+
+- **[Importing from Aegis](./docs/import_aegis.md)**: A step-by-step guide to migrate all your accounts from Aegis Authenticator.
+- **Manual Migration**: For other apps, export your accounts as a **plain text list of `otpauth://` URIs** (one per line). Save this file with a `.flauth` extension, then use the **Local File** import feature.
+  ```text
+  otpauth://totp/GitHub:user?secret=ABC...&issuer=GitHub
+  otpauth://totp/Google:user@gmail.com?secret=XYZ...&issuer=Google
+  ```
 
 ## ⬇️ Download
 

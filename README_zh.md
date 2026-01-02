@@ -22,11 +22,20 @@
 
 ## 📸 截图预览
 
-![](assets/backup-local.png)
-![](assets/backup-webdav.png)
-![](assets/account-two.png)
+<img src="assets/homepage.webp" alt="Account List" width="200"/>
+<img src="assets/backup.webp" alt="WebDAV Backup" width="200"/>
+<img src="assets/security.webp" alt="Security Settings" width="200"/>
 
-**便捷管理**：点击复制，滑动删除（带二次确认），长按改变顺序。
+## 📥 从其他应用导入
+
+得益于对标准 `otpauth://` URI 的支持，迁移到 Flauth 非常简单：
+
+- **[从 Aegis 导入](./docs/import_aegis_zh.md)**：分步指南，教您如何从 Aegis Authenticator 迁移所有账号。
+- **手动迁移**：对于其他应用，请将其账号导出为**纯文本格式的 `otpauth://` URI 列表**（每行一个）。将该文件保存为 `.flauth` 后缀，然后使用“本地文件”导入功能。
+  ```text
+  otpauth://totp/GitHub:user?secret=ABC...&issuer=GitHub
+  otpauth://totp/Google:user@gmail.com?secret=XYZ...&issuer=Google
+  ```
 
 ## ⬇️ 下载安装
 
