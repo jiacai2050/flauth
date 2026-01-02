@@ -4,17 +4,24 @@ import 'package:provider/provider.dart';
 import '../models/account.dart';
 import '../providers/account_provider.dart';
 
-class AccountTile extends StatelessWidget {
+class AccountTile extends StatefulWidget {
   final Account account;
 
   const AccountTile({super.key, required this.account});
+
+  @override
+  State<AccountTile> createState() => _AccountTileState();
+}
+
+class _AccountTileState extends State<AccountTile> {
+  bool _isVisible = false;
 
   @override
   Widget build(BuildContext context) {
     // We listen to the provider so this widget rebuilds every time the timer ticks (via notifyListeners),
     // ensuring the code stays up-to-date.
     final provider = Provider.of<AccountProvider>(context);
-    final code = provider.getCurrentCode(account.secret);
+    final code = provider.getCurrentCode(widget.account.secret);
 
     // Format code for readability (e.g., "123 456")
     final formattedCode = code.length == 6
@@ -23,7 +30,7 @@ class AccountTile extends StatelessWidget {
 
     // Dismissible allows the user to swipe the tile to delete the account.
     return Dismissible(
-      key: Key(account.id),
+      key: Key(widget.account.id),
       background: Container(
         color: Colors.red,
         alignment: Alignment.centerRight,
@@ -56,10 +63,10 @@ class AccountTile extends StatelessWidget {
         );
       },
       onDismissed: (direction) {
-        provider.deleteAccount(account.id);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('${account.name} deleted')));
+        provider.deleteAccount(widget.account.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${widget.account.name} deleted')),
+        );
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -67,47 +74,92 @@ class AccountTile extends StatelessWidget {
         child: InkWell(
           // Allow copying the code to clipboard on tap.
           onTap: () {
-            Clipboard.setData(ClipboardData(text: code));
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Code copied to clipboard'),
-                duration: Duration(seconds: 1),
-              ),
-            );
+            setState(() {
+              _isVisible = !_isVisible;
+            });
+
+            if (_isVisible) {
+              Clipboard.setData(ClipboardData(text: code));
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Code revealed and copied to clipboard'),
+                  duration: Duration(seconds: 1),
+                ),
+              );
+            }
           },
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 20.0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      account.issuer.isNotEmpty
-                          ? '${account.issuer} (${account.name})'
-                          : account.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.grey[600],
+                    Expanded(
+                      child: Text(
+                        widget.account.issuer.isNotEmpty
+                            ? (_isVisible
+                                  ? widget.account.issuer
+                                  : '${widget.account.issuer} (${widget.account.name})')
+                            : widget.account.name,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: _isVisible ? Colors.grey[600] : null,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      formattedCode,
-                      style: Theme.of(context).textTheme.headlineMedium
-                          ?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                    Icon(
+                      _isVisible ? Icons.visibility : Icons.visibility_off,
+                      size: 20,
+                      color: Colors.grey.withValues(alpha: 0.5),
                     ),
                   ],
                 ),
+                if (_isVisible) ...[
+                  if (widget.account.issuer.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Text(
+                        widget.account.name,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        formattedCode,
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                      ),
+                      Text(
+                        '${provider.remainingSeconds}s',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: provider.remainingSeconds < 6
+                              ? Colors.red
+                              : Colors.grey,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

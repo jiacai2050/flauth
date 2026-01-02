@@ -31,12 +31,69 @@ class _ImportExportScreenState extends State<ImportExportScreen>
   late TabController _tabController;
 
   bool _isLoading = false;
+  String? _lastCloudBackupTime;
 
   @override
   void initState() {
     super.initState();
 
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.index == 0 && _lastCloudBackupTime == null) {
+        _fetchLastCloudBackupTime();
+      }
+    });
+
+    // Auto fetch if we start on the first tab
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_tabController.index == 0) _fetchLastCloudBackupTime();
+    });
+  }
+
+  Future<void> _fetchLastCloudBackupTime() async {
+    try {
+      final config = await _getWebDavConfig();
+      if (config == null || config['url'] == null) return;
+
+      final url = config['url']!;
+      final user = config['username'] ?? '';
+      final pass = config['password'] ?? '';
+
+      String baseUrl = url;
+      if (!baseUrl.endsWith('/')) baseUrl += '/';
+      String remotePath = config['path'] ?? '';
+      if (remotePath.startsWith('/')) remotePath = remotePath.substring(1);
+      if (remotePath.isNotEmpty && !remotePath.endsWith('/')) remotePath += '/';
+
+      final fullUrl = '$baseUrl$remotePath$_fixedFileName';
+      final basicAuth = 'Basic ${base64Encode(utf8.encode('$user:$pass'))}';
+
+      final response = await http.head(
+        Uri.parse(fullUrl),
+        headers: {'Authorization': basicAuth},
+      );
+
+      if (response.statusCode == 200) {
+        final lastModified = response.headers['last-modified'];
+        if (lastModified != null) {
+          try {
+            final dateTime = HttpDate.parse(lastModified).toLocal();
+            setState(() {
+              _lastCloudBackupTime = DateFormat.yMMMd().add_Hms().format(
+                dateTime,
+              );
+            });
+          } catch (e) {
+            debugPrint('Failed to parse last-modified date: $e');
+            setState(() {
+              _lastCloudBackupTime = lastModified;
+            });
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Failed to fetch backup time: $e');
+    }
   }
 
   @override
@@ -155,6 +212,7 @@ class _ImportExportScreenState extends State<ImportExportScreen>
     setState(() => _isLoading = true);
 
     try {
+      final provider = Provider.of<AccountProvider>(context, listen: false);
       final exportData = await _prepareExportContent();
       if (exportData == null) return;
 
@@ -175,6 +233,7 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
         if (finalPath != null) {
           _showSnackBar('Backup saved successfully');
+          provider.updateLastBackupTime();
         }
       } else if (Platform.isIOS) {
         // iOS: Save to Documents
@@ -184,6 +243,7 @@ class _ImportExportScreenState extends State<ImportExportScreen>
         await file.writeAsString(exportData.content);
 
         _showSnackBar('Saved to "Files" App > On My iPhone > Flauth');
+        provider.updateLastBackupTime();
       } else {
         // Desktop: Use Save Dialog
         final outputPath = await FilePicker.platform.saveFile(
@@ -197,6 +257,7 @@ class _ImportExportScreenState extends State<ImportExportScreen>
           final file = File(outputPath);
           await file.writeAsString(exportData.content);
           _showSnackBar('Saved to: $outputPath');
+          provider.updateLastBackupTime();
         }
       }
     } catch (e) {
@@ -300,8 +361,16 @@ class _ImportExportScreenState extends State<ImportExportScreen>
         body: exportData.content,
       );
 
+      if (!mounted) return;
+
       if (response.statusCode >= 200 && response.statusCode < 300) {
         _showSnackBar('Uploaded successfully to $fullUrl');
+        final accountProvider = Provider.of<AccountProvider>(
+          context,
+          listen: false,
+        );
+        accountProvider.updateLastBackupTime();
+        _fetchLastCloudBackupTime(); // Refresh cloud time
       } else {
         throw Exception('Status ${response.statusCode}: ${response.body}');
       }
@@ -408,9 +477,9 @@ class _ImportExportScreenState extends State<ImportExportScreen>
           controller: _tabController,
 
           tabs: const [
-            Tab(text: 'Local File', icon: Icon(Icons.folder)),
-
             Tab(text: 'WebDAV Cloud', icon: Icon(Icons.cloud)),
+
+            Tab(text: 'Local File', icon: Icon(Icons.folder)),
           ],
         ),
 
@@ -429,6 +498,48 @@ class _ImportExportScreenState extends State<ImportExportScreen>
         controller: _tabController,
 
         children: [
+          // WebDAV Tab
+          Consumer<AccountProvider>(
+            builder: (context, provider, _) => _buildActionView(
+              icon: Icons.cloud_sync,
+              title: 'WebDAV Cloud',
+              desc:
+                  'Sync backups with your private cloud (Nextcloud, InfiniCloud etc).',
+              btn1Text: 'Upload to Cloud',
+              btn1Icon: Icons.cloud_upload,
+              btn1Action: _handleWebDavUpload,
+              btn2Text: 'Restore from Cloud',
+              btn2Icon: Icons.cloud_download,
+              btn2Action: _handleWebDavDownload,
+              extra: Padding(
+                padding: const EdgeInsets.only(top: 24),
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: [
+                    if (_lastCloudBackupTime != null)
+                      _buildTimeBadge(
+                        context,
+                        Icons.cloud_done_outlined,
+                        'Cloud',
+                        _lastCloudBackupTime!,
+                      ),
+                    if (provider.lastLocalBackupTime != null)
+                      _buildTimeBadge(
+                        context,
+                        Icons.devices_outlined,
+                        'Local',
+                        DateFormat.yMMMd().add_Hms().format(
+                          provider.lastLocalBackupTime!,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
           // Local Tab
           _buildActionView(
             icon: Icons.sd_storage,
@@ -449,19 +560,39 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
             btn2Action: _handleLocalImport,
           ),
+        ],
+      ),
+    );
+  }
 
-          // WebDAV Tab
-          _buildActionView(
-            icon: Icons.cloud_sync,
-            title: 'WebDAV Cloud',
-            desc:
-                'Sync backups with your private cloud (Nextcloud, InfiniCloud etc).',
-            btn1Text: 'Upload to Cloud',
-            btn1Icon: Icons.cloud_upload,
-            btn1Action: _handleWebDavUpload,
-            btn2Text: 'Restore from Cloud',
-            btn2Icon: Icons.cloud_download,
-            btn2Action: _handleWebDavDownload,
+  Widget _buildTimeBadge(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String time,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 14,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '$label: $time',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -470,22 +601,15 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
   Widget _buildActionView({
     required IconData icon,
-
     required String title,
-
     required String desc,
-
     required String btn1Text,
-
     required IconData btn1Icon,
-
     required VoidCallback btn1Action,
-
     required String btn2Text,
-
     required IconData btn2Icon,
-
     required VoidCallback btn2Action,
+    Widget? extra,
   }) {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -494,35 +618,24 @@ class _ImportExportScreenState extends State<ImportExportScreen>
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
-
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-
           crossAxisAlignment: CrossAxisAlignment.stretch,
-
           children: [
             Icon(icon, size: 80, color: Colors.blueGrey),
-
             const SizedBox(height: 32),
-
             Text(
               title,
-
               textAlign: TextAlign.center,
-
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 8),
-
             Text(
               desc,
-
               textAlign: TextAlign.center,
-
               style: const TextStyle(color: Colors.grey),
             ),
-
+            if (extra != null) extra,
             const SizedBox(height: 48),
 
             FilledButton.icon(

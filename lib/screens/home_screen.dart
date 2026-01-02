@@ -96,12 +96,14 @@ class _HomeScreenState extends State<HomeScreen> {
               return LinearProgressIndicator(
                 value: provider.progress,
                 minHeight: 4.0,
-                backgroundColor: Colors.transparent,
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.primaryContainer.withValues(alpha: 0.3),
                 // Change color to red when time is running out (< 20%).
                 valueColor: AlwaysStoppedAnimation<Color>(
                   provider.progress < 0.2
                       ? Colors.red
-                      : Theme.of(context).primaryColor,
+                      : Theme.of(context).colorScheme.primary,
                 ),
               );
             },
