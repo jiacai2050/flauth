@@ -38,10 +38,13 @@ jobs:
           #   asset_extension: .zip
           #   asset_content_type: application/zip
           - os: ubuntu-latest
-            target: apk
-            artifact_name: flauth-android
+            target: apk-universal
+            artifact_name: flauth-android-universal
             asset_extension: .apk
-            asset_content_type: application/vnd.android.package-archive
+          - os: ubuntu-latest
+            target: apk-split
+            artifact_name: flauth-android-split
+            asset_extension: .apk
 
     runs-on: ${{ matrix.os }}
 
@@ -92,11 +95,15 @@ jobs:
           cd build/macos/Build/Products/Release
           zip -r "$GITHUB_WORKSPACE/${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }}" flauth.app
 
-      - name: Build Android
-        if: matrix.target == 'apk'
+      - name: Build Android (Universal)
+        if: matrix.target == 'apk-universal'
         run: |
           flutter build apk --release
-          cp build/app/outputs/flutter-apk/app-release.apk flauth-android-universal-${{ env.VERSION }}.apk
+          mv build/app/outputs/flutter-apk/app-release.apk flauth-android-universal-${{ env.VERSION }}.apk
+
+      - name: Build Android (Split)
+        if: matrix.target == 'apk-split'
+        run: |
           flutter build apk --release --split-per-abi
           mv build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk flauth-android-armeabi-v7a-${{ env.VERSION }}.apk
           mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk flauth-android-arm64-v8a-${{ env.VERSION }}.apk
