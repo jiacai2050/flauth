@@ -14,15 +14,16 @@ if [ -z "$version" ]; then
     fi
 fi
 
-target_file="/tmp/flauth-macos-$version.zip"
+target_file="/tmp/flauth-macos-universal-$version.zip"
 echo "Releasing version $version"
 echo "Building macOS release..."
 flutter build macos --release
 echo "Build completed."
 
 echo "Packaging release into $target_file ..."
-pushd "${script_dir}/build/macos/Build/Products/Release/"
+pushd "${script_dir}/../build/macos/Build/Products/Release/"
 zip -r "$target_file" "flauth.app"
 popd
 
 echo "macOS release packaged at $target_file"
+ls -lh "$target_file"
