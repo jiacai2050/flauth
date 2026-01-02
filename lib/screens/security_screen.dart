@@ -38,14 +38,14 @@ class _SecurityScreenState extends State<SecurityScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                _tempPin.isEmpty ? 'Enter 4-digit PIN' : 'Re-enter to confirm',
+                _tempPin.isEmpty ? 'Enter 6-digit PIN' : 'Re-enter to confirm',
                 style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 32),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: PinPad(
-                  pinLength: 4,
+                  pinLength: 6,
                   onSubmit: (pin) {
                     if (_tempPin.isEmpty) {
                       // First entry

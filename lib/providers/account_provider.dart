@@ -10,27 +10,26 @@ class AccountProvider with ChangeNotifier {
   final StorageService _storageService = StorageService();
   List<Account> _accounts = [];
   Timer? _timer;
-  DateTime? _lastLocalBackupTime;
+  DateTime? _lastWebDavSyncTime;
 
   // Progress of the current 30-second TOTP window (1.0 = full, 0.0 = empty).
   double _progress = 1.0;
 
   List<Account> get accounts => _accounts;
   double get progress => _progress;
-  DateTime? get lastLocalBackupTime => _lastLocalBackupTime;
+  DateTime? get lastWebDavSyncTime => _lastWebDavSyncTime;
   int get remainingSeconds =>
       (30 - (DateTime.now().millisecondsSinceEpoch / 1000) % 30).floor();
 
   AccountProvider() {
+    // Accounts and sync times are loaded asynchronously from secure storage.
     _loadAccounts();
-    _startTimer();
   }
 
   /// Starts a periodic timer to update the progress bar and refresh codes.
   /// Updates every 100ms for smooth UI animation.
   void _startTimer() {
     _timer?.cancel();
-    if (_accounts.isEmpty) return;
 
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       final now = DateTime.now().millisecondsSinceEpoch;
@@ -48,14 +47,14 @@ class AccountProvider with ChangeNotifier {
 
   Future<void> _loadAccounts() async {
     _accounts = await _storageService.getAccounts();
-    _lastLocalBackupTime = await _storageService.getLastLocalBackupTime();
+    _lastWebDavSyncTime = await _storageService.getLastWebDavSyncTime();
     _startTimer();
     notifyListeners();
   }
 
-  Future<void> updateLastBackupTime() async {
-    _lastLocalBackupTime = DateTime.now();
-    await _storageService.setLastLocalBackupTime(_lastLocalBackupTime);
+  Future<void> updateLastSyncTime() async {
+    _lastWebDavSyncTime = DateTime.now();
+    await _storageService.setLastWebDavSyncTime(_lastWebDavSyncTime);
     notifyListeners();
   }
 
@@ -190,7 +189,6 @@ class AccountProvider with ChangeNotifier {
       );
     } catch (e) {
       // Return error string if secret is invalid (e.g. not valid Base32)
-      debugPrint('Error generating TOTP code: $e, secret: $secret');
       return 'ERROR';
     }
   }

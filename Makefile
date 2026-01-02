@@ -12,4 +12,8 @@ lint:
 test:
 	flutter test
 
-.PHONY: fmt lint test fix
+gen:
+	#dart run flutter_launcher_icons:generate --override
+	flutter pub run flutter_launcher_icons
+
+.PHONY: fmt lint test fix gen

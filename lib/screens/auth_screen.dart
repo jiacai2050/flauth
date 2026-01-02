@@ -99,7 +99,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40),
                   child: PinPad(
-                    pinLength: 4, // Assuming 4-digit PIN
+                    pinLength: 6, // Changed to 6-digit PIN
                     onSubmit: _handlePinSubmit,
                     showBiometricButton: auth.isBiometricEnabled && !isLocked,
                     onBiometricPressed: () => auth.authenticateWithBiometrics(),

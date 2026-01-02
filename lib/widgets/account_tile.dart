@@ -14,13 +14,16 @@ class AccountTile extends StatefulWidget {
 }
 
 class _AccountTileState extends State<AccountTile> {
-  bool _isVisible = false;
+  bool _isCodeVisible = false;
 
   @override
   Widget build(BuildContext context) {
-    // We listen to the provider so this widget rebuilds every time the timer ticks (via notifyListeners),
-    // ensuring the code stays up-to-date.
-    final provider = Provider.of<AccountProvider>(context);
+    // Optimization: Only rebuild when remainingSeconds changes (once per second)
+    // or when the account's specific data might have changed.
+    final remainingSeconds = context.select<AccountProvider, int>(
+      (p) => p.remainingSeconds,
+    );
+    final provider = Provider.of<AccountProvider>(context, listen: false);
     final code = provider.getCurrentCode(widget.account.secret);
 
     // Format code for readability (e.g., "123 456")
@@ -75,10 +78,10 @@ class _AccountTileState extends State<AccountTile> {
           // Allow copying the code to clipboard on tap.
           onTap: () {
             setState(() {
-              _isVisible = !_isVisible;
+              _isCodeVisible = !_isCodeVisible;
             });
 
-            if (_isVisible) {
+            if (_isCodeVisible) {
               Clipboard.setData(ClipboardData(text: code));
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
               ScaffoldMessenger.of(context).showSnackBar(
@@ -104,25 +107,25 @@ class _AccountTileState extends State<AccountTile> {
                     Expanded(
                       child: Text(
                         widget.account.issuer.isNotEmpty
-                            ? (_isVisible
+                            ? (_isCodeVisible
                                   ? widget.account.issuer
                                   : '${widget.account.issuer} (${widget.account.name})')
                             : widget.account.name,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: _isVisible ? Colors.grey[600] : null,
+                          color: _isCodeVisible ? Colors.grey[600] : null,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Icon(
-                      _isVisible ? Icons.visibility : Icons.visibility_off,
+                      _isCodeVisible ? Icons.visibility : Icons.visibility_off,
                       size: 20,
                       color: Colors.grey.withValues(alpha: 0.5),
                     ),
                   ],
                 ),
-                if (_isVisible) ...[
+                if (_isCodeVisible) ...[
                   if (widget.account.issuer.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 4.0),
@@ -149,9 +152,9 @@ class _AccountTileState extends State<AccountTile> {
                             ),
                       ),
                       Text(
-                        '${provider.remainingSeconds}s',
+                        '${remainingSeconds}s',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: provider.remainingSeconds < 6
+                          color: remainingSeconds < 6
                               ? Colors.red
                               : Colors.grey,
                           fontWeight: FontWeight.bold,
