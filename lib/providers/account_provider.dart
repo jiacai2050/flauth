@@ -78,7 +78,7 @@ class AccountProvider with ChangeNotifier {
       secret: cleanSecret,
       issuer: issuer,
     );
-    _accounts.add(newAccount);
+    _accounts = [..._accounts, newAccount];
     await _storageService.saveAccount(newAccount);
     await _saveOrder();
     notifyListeners();
@@ -86,7 +86,7 @@ class AccountProvider with ChangeNotifier {
   }
 
   Future<void> deleteAccount(String id) async {
-    _accounts.removeWhere((a) => a.id == id);
+    _accounts = _accounts.where((a) => a.id != id).toList();
     await _storageService.deleteAccount(id);
     await _saveOrder();
     notifyListeners();
@@ -97,8 +97,10 @@ class AccountProvider with ChangeNotifier {
     if (oldIndex < newIndex) {
       newIndex -= 1;
     }
-    final Account item = _accounts.removeAt(oldIndex);
-    _accounts.insert(newIndex, item);
+    final List<Account> newList = List.from(_accounts);
+    final Account item = newList.removeAt(oldIndex);
+    newList.insert(newIndex, item);
+    _accounts = newList;
 
     notifyListeners(); // Update UI immediately
 
@@ -117,7 +119,7 @@ class AccountProvider with ChangeNotifier {
     if (_accounts.any((a) => a.secret == account.secret)) {
       return false;
     }
-    _accounts.add(account);
+    _accounts = [..._accounts, account];
     await _storageService.saveAccount(account);
     await _saveOrder();
     notifyListeners();
@@ -150,6 +152,7 @@ class AccountProvider with ChangeNotifier {
     int count = 0;
     final lines = text.split('\n');
     final List<Account> newAccounts = [];
+    final List<Account> currentAccounts = List.from(_accounts);
 
     for (var line in lines) {
       if (line.trim().isEmpty) continue;
@@ -158,8 +161,8 @@ class AccountProvider with ChangeNotifier {
         final account = Account.fromUri(uri);
 
         // Check for duplicates based on secret
-        if (!_accounts.any((a) => a.secret == account.secret)) {
-          _accounts.add(account);
+        if (!currentAccounts.any((a) => a.secret == account.secret)) {
+          currentAccounts.add(account);
           newAccounts.add(account);
           count++;
         }
@@ -170,6 +173,7 @@ class AccountProvider with ChangeNotifier {
     }
 
     if (newAccounts.isNotEmpty) {
+      _accounts = currentAccounts;
       // Only save the newly added accounts
       await _storageService.saveAccounts(newAccounts);
       await _saveOrder();
