@@ -14,9 +14,6 @@ class AccountProvider with ChangeNotifier {
 
   // Progress of the current 30-second TOTP window (1.0 = full, 0.0 = empty).
   double _progress = 1.0;
-  // Cache TOTP codes per 30s step to avoid recomputing on every rebuild.
-  final Map<String, String> _codeCache = {};
-  int _codeCacheStep = -1;
 
   List<Account> get accounts => _accounts;
   double get progress => _progress;
@@ -36,19 +33,8 @@ class AccountProvider with ChangeNotifier {
 
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       final now = DateTime.now().millisecondsSinceEpoch;
-      // TOTP codes are valid for 30 seconds.
-      // We calculate how many seconds have passed in the current window.
       final seconds = (now / 1000) % 30;
-
-      // Calculate remaining percentage for the progress bar.
       _progress = 1.0 - (seconds / 30.0);
-
-      // Invalidate code cache when 30s window changes.
-      final step = now ~/ 30000;
-      if (step != _codeCacheStep) {
-        _codeCacheStep = step;
-        _codeCache.clear();
-      }
 
       // Notify UI to redraw (updating the progress bar and the codes if the window changed).
       notifyListeners();
@@ -189,26 +175,14 @@ class AccountProvider with ChangeNotifier {
   }
 
   /// Generates the current 6-digit TOTP code for a given secret.
-  /// Uses a cache per 30s step to avoid recomputing on each rebuild.
   String getCurrentCode(String secret) {
     try {
-      final now = DateTime.now().millisecondsSinceEpoch;
-      final step = now ~/ 30000;
-      if (step != _codeCacheStep) {
-        _codeCacheStep = step;
-        _codeCache.clear();
-      }
-      final cached = _codeCache[secret];
-      if (cached != null) return cached;
-
-      final code = OTP.generateTOTPCodeString(
+      return OTP.generateTOTPCodeString(
         secret,
-        now,
+        DateTime.now().millisecondsSinceEpoch,
         algorithm: Algorithm.SHA1,
         isGoogle: true, // Uses Google Authenticator compatibility
       );
-      _codeCache[secret] = code;
-      return code;
     } catch (e) {
       // Return error string if secret is invalid (e.g. not valid Base32)
       return 'ERROR';

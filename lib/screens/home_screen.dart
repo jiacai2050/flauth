@@ -90,26 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
         // Display a progress bar at the bottom of the AppBar.
         // This gives a visual indication of when the code will expire.
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4.0),
-          child: Consumer<AccountProvider>(
-            builder: (context, provider, child) {
-              return LinearProgressIndicator(
-                value: provider.progress,
-                minHeight: 4.0,
-                backgroundColor: Theme.of(
-                  context,
-                ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                // Change color to red when time is running out (< 20%).
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  provider.progress < 0.2
-                      ? Colors.red
-                      : Theme.of(context).colorScheme.primary,
-                ),
-              );
-            },
-          ),
-        ),
+        bottom: _AppBarProgress(),
       ),
       body: Selector<AccountProvider, List<Account>>(
         selector: (_, p) => p.accounts,
@@ -162,6 +143,34 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: const Icon(Icons.qr_code_scanner),
         label: const Text('Scan'),
       ),
+    );
+  }
+}
+
+class _AppBarProgress extends StatelessWidget implements PreferredSizeWidget {
+  @override
+  Size get preferredSize => const Size.fromHeight(4.0);
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AccountProvider>(
+      builder: (context, provider, child) {
+        if (provider.accounts.isEmpty) {
+          return const SizedBox(height: 4.0);
+        }
+        return LinearProgressIndicator(
+          value: provider.progress,
+          minHeight: 4.0,
+          backgroundColor: Theme.of(
+            context,
+          ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+          valueColor: AlwaysStoppedAnimation<Color>(
+            provider.progress < 0.2
+                ? Colors.red
+                : Theme.of(context).colorScheme.primary,
+          ),
+        );
+      },
     );
   }
 }
