@@ -24,12 +24,6 @@ class _AccountTileState extends State<AccountTile> {
       (p) => p.remainingSeconds,
     );
     final provider = Provider.of<AccountProvider>(context, listen: false);
-    final code = provider.getCurrentCode(widget.account.secret);
-
-    // Format code for readability (e.g., "123 456")
-    final formattedCode = code.length == 6
-        ? '${code.substring(0, 3)} ${code.substring(3)}'
-        : code;
 
     // Dismissible allows the user to swipe the tile to delete the account.
     return Dismissible(
@@ -82,7 +76,11 @@ class _AccountTileState extends State<AccountTile> {
             });
 
             if (_isCodeVisible) {
-              Clipboard.setData(ClipboardData(text: code));
+              Clipboard.setData(
+                ClipboardData(
+                  text: provider.getCurrentCode(widget.account.secret),
+                ),
+              );
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(

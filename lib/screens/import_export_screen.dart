@@ -413,8 +413,9 @@ class _ImportExportScreenState extends State<ImportExportScreen>
         controller: _tabController,
         children: [
           // WebDAV Tab
-          Consumer<AccountProvider>(
-            builder: (context, provider, _) => _buildActionView(
+          Selector<AccountProvider, DateTime?>(
+            selector: (_, p) => p.lastWebDavSyncTime,
+            builder: (context, lastSync, _) => _buildActionView(
               icon: Icons.cloud_sync,
               title: 'WebDAV Cloud',
               desc:
@@ -439,14 +440,12 @@ class _ImportExportScreenState extends State<ImportExportScreen>
                         'Cloud',
                         _lastCloudBackupTime!,
                       ),
-                    if (provider.lastWebDavSyncTime != null)
+                    if (lastSync != null)
                       _buildTimeBadge(
                         context,
                         Icons.sync_alt_outlined,
                         'Synced',
-                        DateFormat.yMMMd().add_Hms().format(
-                          provider.lastWebDavSyncTime!,
-                        ),
+                        DateFormat.yMMMd().add_Hms().format(lastSync),
                       ),
                   ],
                 ),

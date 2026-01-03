@@ -123,10 +123,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'No accounts yet',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(color: Colors.grey),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleLarge?.copyWith(color: Colors.grey),
                   ),
                   const SizedBox(height: 8),
                   const Text('Tap the button below to scan a QR code'),
@@ -137,13 +136,17 @@ class _HomeScreenState extends State<HomeScreen> {
           return ReorderableListView.builder(
             itemCount: accounts.length,
             onReorder: (oldIndex, newIndex) {
-              Provider.of<AccountProvider>(context, listen: false)
-                  .reorderAccounts(oldIndex, newIndex);
+              Provider.of<AccountProvider>(
+                context,
+                listen: false,
+              ).reorderAccounts(oldIndex, newIndex);
             },
             itemBuilder: (context, index) {
               final account = accounts[index];
               return Container(
-                key: ValueKey(account.id), // Key is required for ReorderableListView
+                key: ValueKey(
+                  account.id,
+                ), // Key is required for ReorderableListView
                 child: AccountTile(account: account),
               );
             },
