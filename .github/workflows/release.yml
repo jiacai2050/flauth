@@ -53,6 +53,7 @@ jobs:
             asset_extension: .apk
 
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v5

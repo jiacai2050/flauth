@@ -1,0 +1,23 @@
+name: Mirror
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  backup:
+    if: github.repository_owner == 'jiacai2050'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Sourcecraft
+        if: always()
+        run: |
+          # https://sourcecraft.dev/jiacai2050/flauth
+          git push --tags --force \
+          https://git:${{ secrets.SOURCECRAFT_TOKEN }}@git.sourcecraft.dev/${{ github.repository }}.git \
+          "refs/remotes/origin/*:refs/heads/*"
