@@ -54,7 +54,7 @@ If the user chooses to skip encryption, accounts are exported as a simple list o
 3.  **Encryption**: If a password is provided, derive a 256-bit key and encrypt the content.
 4.  **Save/Upload**: 
     *   **Local**: Use the system file picker to save the `.flauth` file (encrypted or plain text).
-    *   **WebDAV**: Upload the content to the configured remote path (defaults to `flauth_backup.flauth`).
+    *   **WebDAV**: Upload the content to the configured remote path (defaults to `backup-otpauth.flauth`).
 
 ### 3.2 Import Workflow
 1.  **Read Content**: Load the file string from local storage or download from WebDAV.

@@ -196,7 +196,7 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
       final now = DateTime.now();
       final fileName =
-          'flauth-${DateFormat('yyyyMMdd-HHmmss').format(now)}.${exportData.extension}';
+          'otpauth-${DateFormat('yyyyMMdd-HHmmss').format(now)}.${exportData.extension}';
 
       if (Platform.isAndroid) {
         // Android: Use System "Save As" dialog via SAF (Storage Access Framework)
