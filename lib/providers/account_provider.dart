@@ -33,10 +33,14 @@ class AccountProvider with ChangeNotifier {
 
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       final now = DateTime.now().millisecondsSinceEpoch;
+      // TOTP codes are valid for 30 seconds.
+      // We calculate how many seconds have passed in the current window.
       final seconds = (now / 1000) % 30;
+
+      // Calculate remaining percentage for the progress bar.
       _progress = 1.0 - (seconds / 30.0);
 
-      // Simple broadcast to all listeners
+      // Notify UI to redraw (updating the progress bar and the codes if the window changed).
       notifyListeners();
     });
   }
