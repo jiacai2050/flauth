@@ -19,7 +19,6 @@ class _AccountTileState extends State<AccountTile> {
   @override
   Widget build(BuildContext context) {
     // Optimization: Only rebuild when remainingSeconds changes (once per second)
-    // or when the account's specific data might have changed.
     final remainingSeconds = context.select<AccountProvider, int>(
       (p) => p.remainingSeconds,
     );
@@ -42,7 +41,6 @@ class _AccountTileState extends State<AccountTile> {
       ),
       direction: DismissDirection.endToStart,
       confirmDismiss: (direction) async {
-        // Show confirmation dialog before actual deletion to prevent accidents.
         return await showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -75,7 +73,6 @@ class _AccountTileState extends State<AccountTile> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         elevation: 2,
         child: InkWell(
-          // Allow copying the code to clipboard on tap.
           onTap: () {
             setState(() {
               _isCodeVisible = !_isCodeVisible;

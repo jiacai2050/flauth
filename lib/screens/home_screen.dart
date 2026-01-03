@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/account_provider.dart';
 import '../providers/auth_provider.dart';
+import '../models/account.dart';
 import '../widgets/account_tile.dart';
 import 'scan_qr_screen.dart';
 import 'import_export_screen.dart';
@@ -89,30 +90,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
         // Display a progress bar at the bottom of the AppBar.
         // This gives a visual indication of when the code will expire.
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4.0),
-          child: Consumer<AccountProvider>(
-            builder: (context, provider, child) {
-              return LinearProgressIndicator(
-                value: provider.progress,
-                minHeight: 4.0,
-                backgroundColor: Theme.of(
-                  context,
-                ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                // Change color to red when time is running out (< 20%).
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  provider.progress < 0.2
-                      ? Colors.red
-                      : Theme.of(context).colorScheme.primary,
-                ),
-              );
-            },
-          ),
-        ),
+        bottom: _AppBarProgress(),
       ),
-      body: Consumer<AccountProvider>(
-        builder: (context, provider, child) {
-          if (provider.accounts.isEmpty) {
+      body: Selector<AccountProvider, List<Account>>(
+        selector: (_, p) => p.accounts,
+        builder: (context, accounts, child) {
+          if (accounts.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -132,12 +115,15 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           }
           return ReorderableListView.builder(
-            itemCount: provider.accounts.length,
+            itemCount: accounts.length,
             onReorder: (oldIndex, newIndex) {
-              provider.reorderAccounts(oldIndex, newIndex);
+              Provider.of<AccountProvider>(
+                context,
+                listen: false,
+              ).reorderAccounts(oldIndex, newIndex);
             },
             itemBuilder: (context, index) {
-              final account = provider.accounts[index];
+              final account = accounts[index];
               return Container(
                 key: ValueKey(
                   account.id,
@@ -157,6 +143,34 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: const Icon(Icons.qr_code_scanner),
         label: const Text('Scan'),
       ),
+    );
+  }
+}
+
+class _AppBarProgress extends StatelessWidget implements PreferredSizeWidget {
+  @override
+  Size get preferredSize => const Size.fromHeight(4.0);
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AccountProvider>(
+      builder: (context, provider, child) {
+        if (provider.accounts.isEmpty) {
+          return const SizedBox(height: 4.0);
+        }
+        return LinearProgressIndicator(
+          value: provider.progress,
+          minHeight: 4.0,
+          backgroundColor: Theme.of(
+            context,
+          ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+          valueColor: AlwaysStoppedAnimation<Color>(
+            provider.progress < 0.2
+                ? Colors.red
+                : Theme.of(context).colorScheme.primary,
+          ),
+        );
+      },
     );
   }
 }

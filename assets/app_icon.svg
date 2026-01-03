@@ -27,16 +27,16 @@
   <!-- Rounded square background -->
   <rect width="1024" height="1024" rx="225" fill="url(#bgGradient)"/>
   
-  <!-- Shield shape - smaller size with more padding -->
+  <!-- Shield shape - shorter and more square -->
   <g filter="url(#shadow)">
-    <path d="M 512 140 L 760 220 L 760 450 Q 760 680 512 880 Q 264 680 264 450 L 264 220 Z" 
+    <path d="M 512 180 L 800 250 L 800 520 Q 800 680 512 840 Q 224 680 224 520 L 224 250 Z" 
           fill="url(#shieldGradient)" 
           stroke="#e0f2fe" 
           stroke-width="6"/>
   </g>
   
   <!-- Clock/Timer elements -->
-  <g transform="translate(512, 480)">
+  <g transform="translate(512, 500)">
     <!-- Outer circle -->
     <circle cx="0" cy="0" r="150" fill="none" stroke="#3b82f6" stroke-width="12" opacity="0.5"/>
     

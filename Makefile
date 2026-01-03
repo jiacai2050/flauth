@@ -16,4 +16,7 @@ gen:
 	#dart run flutter_launcher_icons:generate --override
 	flutter pub run flutter_launcher_icons
 
-.PHONY: fmt lint test fix gen
+perf:
+	flutter run --profile -d mac
+
+.PHONY: fmt lint test fix gen perf

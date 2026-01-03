@@ -82,6 +82,12 @@ jobs:
             echo "VERSION=unknown" >> $GITHUB_ENV
           fi
 
+      - name: Setup Android Signing
+        if: contains(matrix.target, 'apk')
+        run: |
+          echo "${{ secrets.ANDROID_KEY_PROPERTIES }}" > android/key.properties
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+
       - name: Build Linux
         if: matrix.target == 'linux'
         run: |

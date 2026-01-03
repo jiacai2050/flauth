@@ -17,9 +17,12 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   void initState() {
     super.initState();
-    // Start a timer to refresh UI every second if locked out
+    // Start a timer to refresh UI only when a lockout is active
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) setState(() {});
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      if (auth.lockoutEndTime != null) {
+        if (mounted) setState(() {});
+      }
     });
 
     // Try biometrics automatically if enabled

@@ -101,6 +101,9 @@ flutter analyze        # Static analysis
 flutter test           # Run unit tests
 ```
 
+### 🔑 Android Signing
+For details on how to configure app signing for production, see the [Android Signing Guide](docs/android-sign.md).
+
 ## 🏗️ Platform Specifics
 
 ### macOS
