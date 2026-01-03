@@ -93,6 +93,8 @@ class _HomeScreenState extends State<HomeScreen> {
         bottom: _AppBarProgress(),
       ),
       body: Selector<AccountProvider, List<Account>>(
+        // Optimization: Selector only triggers a rebuild if the returned value (List reference)
+        // changes. AccountProvider ensures this by creating a new list copy on every modification.
         selector: (_, p) => p.accounts,
         builder: (context, accounts, child) {
           if (accounts.isEmpty) {

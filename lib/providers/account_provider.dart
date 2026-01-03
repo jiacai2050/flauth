@@ -78,6 +78,8 @@ class AccountProvider with ChangeNotifier {
       secret: cleanSecret,
       issuer: issuer,
     );
+    // Use a new list reference so that Widgets using Selector can detect
+    // the change via reference equality (immutability pattern).
     _accounts = [..._accounts, newAccount];
     await _storageService.saveAccount(newAccount);
     await _saveOrder();
@@ -86,6 +88,7 @@ class AccountProvider with ChangeNotifier {
   }
 
   Future<void> deleteAccount(String id) async {
+    // Reassign a new list to ensure UI updates correctly.
     _accounts = _accounts.where((a) => a.id != id).toList();
     await _storageService.deleteAccount(id);
     await _saveOrder();
@@ -97,6 +100,7 @@ class AccountProvider with ChangeNotifier {
     if (oldIndex < newIndex) {
       newIndex -= 1;
     }
+    // Create a new list copy to maintain immutability and trigger UI updates.
     final List<Account> newList = List.from(_accounts);
     final Account item = newList.removeAt(oldIndex);
     newList.insert(newIndex, item);
@@ -119,6 +123,7 @@ class AccountProvider with ChangeNotifier {
     if (_accounts.any((a) => a.secret == account.secret)) {
       return false;
     }
+    // New list reference for immutable state tracking.
     _accounts = [..._accounts, account];
     await _storageService.saveAccount(account);
     await _saveOrder();
@@ -173,6 +178,7 @@ class AccountProvider with ChangeNotifier {
     }
 
     if (newAccounts.isNotEmpty) {
+      // Assign the new list reference to trigger UI updates.
       _accounts = currentAccounts;
       // Only save the newly added accounts
       await _storageService.saveAccounts(newAccounts);
