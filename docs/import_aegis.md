@@ -18,7 +18,7 @@ This method allows you to migrate all accounts at once using Flauth's local impo
 ### Step 2: Prepare the file
 Flauth recognizes files with the `.flauth` extension. 
 1.  Locate the file you just exported (usually named `aegis-export-....txt` or `.json`).
-2.  Rename the file extension to `.flauth`. For example: `backup.flauth`.
+2.  Rename the file extension to `.flauth`. For example: `otpauth-backup.flauth`.
 
 ### Step 3: Import into Flauth
 1.  Open **Flauth**.

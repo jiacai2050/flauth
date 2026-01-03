@@ -18,7 +18,7 @@ Aegis 是一款流行的 Android 开源双重认证管理器。从 Aegis 迁移�
 ### 第二步：准备文件
 Flauth 识别以 `.flauth` 结尾的文件。
 1.  找到您刚刚导出的文件（通常名为 `aegis-export-....txt` 或 `.json`）。
-2.  将文件后缀重命名为 `.flauth`。例如：`backup.flauth`。
+2.  将文件后缀重命名为 `.flauth`。例如：`otpauth-backup.flauth`。
 
 ### 第三步：导入 Flauth
 1.  打开 **Flauth**。

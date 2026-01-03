@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class WebDavService {
-  static const String _fixedFileName = 'flauth_backup.flauth';
+  static const String _fixedFileName = 'backup-otpauth.flauth';
 
   /// Performs a HEAD request to get the last modified time of the backup file.
   static Future<String?> fetchLastModified(Map<String, String> config) async {
