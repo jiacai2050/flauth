@@ -2,6 +2,11 @@ name: Release Build
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g. v0.2.0). Leave empty to use tag name.'
+        required: false
+        default: ''
   pull_request:
     paths-ignore:
       - 'docs/**'
@@ -20,6 +25,7 @@ permissions:
 jobs:
   build-and-release:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
@@ -65,16 +71,16 @@ jobs:
       - name: Install dependencies (Flutter)
         run: flutter pub get
 
-      - name: Set env(release)
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Set env(version)
         shell: bash
         run: |
-          echo "VERSION=${{  github.ref_name }}" >> $GITHUB_ENV
-      - name: Set env(dev)
-        if: "!startsWith(github.ref, 'refs/tags/')"
-        shell: bash
-        run: |
-          echo "VERSION=unknown" >> $GITHUB_ENV
+          if [ "${{ github.event.inputs.version }}" != "" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            echo "VERSION=unknown" >> $GITHUB_ENV
+          fi
 
       - name: Build Linux
         if: matrix.target == 'linux'
