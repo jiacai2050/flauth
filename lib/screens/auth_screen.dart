@@ -17,11 +17,10 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   void initState() {
     super.initState();
-    // Start a timer to refresh UI only when locked out
+    // Start a timer to refresh UI only when a lockout is active
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       final auth = Provider.of<AuthProvider>(context, listen: false);
-      final lockoutEnd = auth.lockoutEndTime;
-      if (lockoutEnd != null && DateTime.now().isBefore(lockoutEnd)) {
+      if (auth.lockoutEndTime != null) {
         if (mounted) setState(() {});
       }
     });
