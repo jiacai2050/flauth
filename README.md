@@ -2,6 +2,10 @@
 
 [中文说明](./README_zh.md)
 
+<div align="center">
+<img src="assets/app_icon.svg" alt="Flauth Logo" width="100"/>
+</div>
+
 > Flauth is a privacy-first, fully open-source TOTP authenticator for Android, macOS, Windows, and Linux.
 
 It provides a simple and lightweight solution for managing your 2FA (Two-Factor Authentication) tokens.
@@ -22,9 +26,11 @@ It provides a simple and lightweight solution for managing your 2FA (Two-Factor 
 
 ## 📸 Screenshots
 
+<div align="center">
 <img src="assets/homepage.webp" alt="Account List" width="200"/>
 <img src="assets/backup.webp" alt="WebDAV Backup" width="200"/>
 <img src="assets/security.webp" alt="Security Settings" width="200"/>
+</div>
 
 
 ## 📥 Importing from other apps
@@ -41,6 +47,15 @@ Migrating to Flauth is easy thanks to its support for standard `otpauth://` URIs
 ## ⬇️ Download
 
 You can find the latest pre-compiled binaries for all supported platforms (Android APK, macOS, Linux, and Windows) on the **[GitHub Releases](https://github.com/jiacai2050/flauth/releases)** page.
+
+### 💡 Which Android APK should I download?
+- **arm64-v8a**: **(Recommended)** For most modern Android phones (64-bit).
+- **armeabi-v7a**: For older 32-bit Android phones.
+- **x86_64**: For Android emulators on PC.
+- **universal**: **(All-in-one)** Works on any device. Choose this if you're unsure, though the file size is larger.
+
+### ⚡️ For Users in China (Download Acceleration)
+If you encounter slow download speeds from GitHub, you can use the [gh-proxy](https://gh-proxy.com/) service to accelerate the download.
 
 ## 🛠️ Development
 

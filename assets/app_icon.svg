@@ -1,0 +1,69 @@
+<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f0f9ff;stop-opacity:0.95" />
+    </linearGradient>
+    
+    <filter id="shadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Rounded square background -->
+  <rect width="1024" height="1024" rx="225" fill="url(#bgGradient)"/>
+  
+  <!-- Shield shape - smaller size with more padding -->
+  <g filter="url(#shadow)">
+    <path d="M 512 140 L 760 220 L 760 450 Q 760 680 512 880 Q 264 680 264 450 L 264 220 Z" 
+          fill="url(#shieldGradient)" 
+          stroke="#e0f2fe" 
+          stroke-width="6"/>
+  </g>
+  
+  <!-- Clock/Timer elements -->
+  <g transform="translate(512, 480)">
+    <!-- Outer circle -->
+    <circle cx="0" cy="0" r="150" fill="none" stroke="#3b82f6" stroke-width="12" opacity="0.5"/>
+    
+    <!-- Time segments (like a countdown) -->
+    <circle cx="0" cy="0" r="150" fill="none" stroke="#3b82f6" stroke-width="12" 
+            stroke-dasharray="471 942" 
+            stroke-dashoffset="0"
+            transform="rotate(-90)"
+            stroke-linecap="round"/>
+    
+    <!-- Inner circle -->
+    <circle cx="0" cy="0" r="120" fill="#3b82f6" opacity="0.2"/>
+    
+    <!-- Clock hands -->
+    <line x1="0" y1="0" x2="0" y2="-65" stroke="#3b82f6" stroke-width="10" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="50" y2="0" stroke="#1d4ed8" stroke-width="9" stroke-linecap="round"/>
+    
+    <!-- Center dot -->
+    <circle cx="0" cy="0" r="12" fill="#1d4ed8"/>
+  </g>
+  
+
+  
+  <!-- Subtle highlight -->
+  <path d="M 225 100 Q 400 150 512 150 Q 624 150 799 100" 
+        fill="none" 
+        stroke="white" 
+        stroke-width="3" 
+        opacity="0.2"/>
+</svg>

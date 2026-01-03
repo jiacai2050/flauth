@@ -2,6 +2,10 @@
 
 [English version](./README.md)
 
+<div align="center">
+<img src="assets/app_icon.svg" alt="Flauth Logo" width="100"/>
+</div>
+
 > Flauth 是一款隐私优先、完全开源的 TOTP 身份验证器，支持 Android、macOS、Windows 和 Linux。
 
 它为管理您的 2FA（双重身份验证）令牌提供了一个简洁轻量的解决方案。
@@ -22,9 +26,11 @@
 
 ## 📸 截图预览
 
+<div align="center">
 <img src="assets/homepage.webp" alt="Account List" width="200"/>
 <img src="assets/backup.webp" alt="WebDAV Backup" width="200"/>
 <img src="assets/security.webp" alt="Security Settings" width="200"/>
+</div>
 
 ## 📥 从其他应用导入
 
@@ -40,6 +46,15 @@
 ## ⬇️ 下载安装
 
 您可以在 **[GitHub Releases](https://github.com/jiacai2050/flauth/releases)** 页面找到所有支持平台（Android APK, macOS, Linux, Windows）的最新预编译安装包。
+
+### 💡 我该下载哪个 Android 安装包？
+- **arm64-v8a**：**（推荐）** 适用于近几年生产的绝大多数现代 64 位手机。
+- **armeabi-v7a**：适用于较旧的 32 位手机。
+- **x86_64**：适用于电脑上的 Android 模拟器。
+- **universal**：**（通用版）** 包含所有架构。如果您不确定该选哪个，请选此版本（体积稍大）。
+
+### ⚡️ 中国用户下载加速
+如果您在从 GitHub 下载时遇到速度较慢的问题，可以使用 [gh-proxy](https://gh-proxy.com/) 等代理服务来加速下载。
 
 ## 🛠️ 开发指南
 
