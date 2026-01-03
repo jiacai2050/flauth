@@ -36,7 +36,7 @@ class AccountProvider with ChangeNotifier {
       final seconds = (now / 1000) % 30;
       _progress = 1.0 - (seconds / 30.0);
 
-      // Notify UI to redraw (updating the progress bar and the codes if the window changed).
+      // Simple broadcast to all listeners
       notifyListeners();
     });
   }
