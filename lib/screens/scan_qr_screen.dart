@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:provider/provider.dart';
 import '../models/account.dart';
 import '../providers/account_provider.dart';
@@ -12,32 +12,21 @@ class ScanQrScreen extends StatefulWidget {
 }
 
 class _ScanQrScreenState extends State<ScanQrScreen> {
-  final MobileScannerController controller = MobileScannerController();
   bool _isProcessing = false;
 
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
   /// Callback when a barcode is detected by the scanner.
-  void _handleBarcode(BarcodeCapture capture) {
+  void _handleScan(Code result) {
     if (_isProcessing) return;
 
-    final List<Barcode> barcodes = capture.barcodes;
-    for (final barcode in barcodes) {
-      if (barcode.rawValue != null) {
-        final String rawValue = barcode.rawValue!;
-        // Check if the QR code is a valid TOTP URI
-        if (rawValue.startsWith('otpauth://')) {
+    if (result.isValid && result.text != null) {
+      final String rawValue = result.text!;
+      // Check if the QR code is a valid TOTP URI
+      if (rawValue.startsWith('otpauth://')) {
+        setState(() {
           _isProcessing = true;
-          // Stop the camera immediately to prevent multiple reads
-          controller.stop();
-
-          _processUri(rawValue);
-          break;
-        }
+        });
+        
+        _processUri(rawValue);
       }
     }
   }
@@ -87,8 +76,6 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
     setState(() {
       _isProcessing = false;
     });
-    // Restart scanning if an error occurred
-    controller.start();
   }
 
   @override
@@ -96,18 +83,15 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Scan QR Code'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.flash_on),
-            onPressed: () => controller.toggleTorch(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.flip_camera_ios),
-            onPressed: () => controller.switchCamera(),
-          ),
-        ],
       ),
-      body: MobileScanner(controller: controller, onDetect: _handleBarcode),
+      body: ReaderWidget(
+        onScan: _handleScan,
+        codeFormat: Format.qrCode,
+        resolution: ResolutionPreset.high,
+        showToggleCamera: true,
+        showFlashlight: true,
+        showGallery: false,
+      ),
     );
   }
 }

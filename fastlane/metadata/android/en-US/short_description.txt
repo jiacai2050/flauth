@@ -1,0 +1,1 @@
+A privacy-first, fully open-source TOTP authenticator for Android, macOS, Windows, and Linux.
