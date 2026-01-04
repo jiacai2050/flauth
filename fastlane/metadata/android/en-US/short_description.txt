@@ -1,0 +1,1 @@
+Privacy-first, open-source TOTP authenticator for 2FA token management.

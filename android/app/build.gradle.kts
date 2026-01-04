@@ -40,8 +40,8 @@ android {
         // https://en.wikipedia.org/wiki/Android_version_history
         minSdk = 28
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        versionCode = 4 // flutter.versionCode
+        versionName = "0.3.1" // flutter.versionName
     }
 
     signingConfigs {
