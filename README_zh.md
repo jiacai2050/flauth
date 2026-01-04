@@ -124,4 +124,4 @@ xattr -rd com.apple.quarantine /Applications/Flauth.app
 
 ## 📄 开源协议
 
-本项目采用 [MIT 协议](https://liujiacai.net/license/MIT)。
+本项目采用 [MIT 协议](./LICENSE)。

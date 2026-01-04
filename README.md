@@ -125,4 +125,4 @@ xattr -rd com.apple.quarantine /Applications/Flauth.app
 
 ## 📄 License
 
-This project is licensed under the [MIT License](https://liujiacai.net/license/MIT).
+This project is licensed under the [MIT License](./LICENSE).
