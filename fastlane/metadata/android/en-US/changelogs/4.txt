@@ -1,0 +1,3 @@
+* Added bottom padding to the account list on the Home screen.
+
+  This ensures that the last few items are no longer obscured by the Floating Action Button (FAB) or SnackBars when the list is scrolled to the bottom.

@@ -16,7 +16,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "net.liujiacai.flauth"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36 // flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -40,8 +40,8 @@ android {
         // https://en.wikipedia.org/wiki/Android_version_history
         minSdk = 28
         targetSdk = flutter.targetSdkVersion
-        versionCode = 4 // flutter.versionCode
-        versionName = "0.3.1" // flutter.versionName
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
 
     signingConfigs {

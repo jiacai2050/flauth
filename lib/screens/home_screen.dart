@@ -117,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           }
           return ReorderableListView.builder(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 80),
             itemCount: accounts.length,
             onReorder: (oldIndex, newIndex) {
               Provider.of<AccountProvider>(
