@@ -27,9 +27,9 @@ It provides a simple and lightweight solution for managing your 2FA (Two-Factor 
 ## 📸 Screenshots
 
 <div align="center">
-<img src="assets/homepage.webp" alt="Account List" width="200"/>
-<img src="assets/backup.webp" alt="WebDAV Backup" width="200"/>
-<img src="assets/security.webp" alt="Security Settings" width="200"/>
+<img src="metadata/android/en-US/images/phoneScreenshots/1.png" alt="Account List" width="200"/>
+<img src="metadata/android/en-US/images/phoneScreenshots/2.png" alt="WebDAV Backup" width="200"/>
+<img src="metadata/android/en-US/images/phoneScreenshots/3.png" alt="Security Settings" width="200"/>
 </div>
 
 
