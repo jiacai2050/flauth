@@ -52,7 +52,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
       if (result.type == ResultType.Barcode) {
         final rawValue = result.rawContent;
         // Authenticator URIs must follow the otpauth:// scheme.
-        if (rawValue.toLowerCase().startsWith('otpauth://')) {
+        if (rawValue.startsWith('otpauth://')) {
           await _processUri(rawValue);
         } else {
           _showError('Invalid QR Code: Not an authenticator URI');
