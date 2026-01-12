@@ -403,9 +403,7 @@ class _ImportExportScreenState extends State<ImportExportScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-
             onPressed: _openWebDavConfig,
-
             tooltip: 'WebDAV Settings',
           ),
         ],
