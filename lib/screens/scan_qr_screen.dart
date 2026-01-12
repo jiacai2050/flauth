@@ -1,5 +1,6 @@
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import '../models/account.dart';
 import '../providers/account_provider.dart';
@@ -35,6 +36,20 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
     });
 
     try {
+      // Explicitly request camera permission before scanning
+      final status = await Permission.camera.request();
+
+      if (!mounted) return;
+
+      if (status.isDenied || status.isPermanentlyDenied) {
+        _showError('Camera permission is required to scan QR codes');
+        if (status.isPermanentlyDenied) {
+          // Optional: Open settings if permanently denied
+          // openAppSettings();
+        }
+        return;
+      }
+
       // Launch the platform-native scanner (ZXing on Android, AVFoundation on iOS).
       // This is more robust than embedding a scanner widget on some hardware.
       final result = await BarcodeScanner.scan(
