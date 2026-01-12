@@ -1,5 +1,5 @@
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import '../models/account.dart';
 import '../providers/account_provider.dart';
@@ -12,38 +12,59 @@ class ScanQrScreen extends StatefulWidget {
 }
 
 class _ScanQrScreenState extends State<ScanQrScreen> {
-  final MobileScannerController controller = MobileScannerController();
-  bool _isProcessing = false;
+  bool _hasScanned = false;
 
   @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    // Use a post-frame callback to trigger the scan immediately after the build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_hasScanned) {
+        _startScan();
+      }
+    });
   }
 
-  /// Callback when a barcode is detected by the scanner.
-  void _handleBarcode(BarcodeCapture capture) {
-    if (_isProcessing) return;
+  Future<void> _startScan() async {
+    try {
+      final result = await BarcodeScanner.scan(
+        options: const ScanOptions(
+          strings: {
+            'cancel': 'Cancel',
+            'flash_on': 'Flash On',
+            'flash_off': 'Flash Off',
+          },
+        ),
+      );
 
-    final List<Barcode> barcodes = capture.barcodes;
-    for (final barcode in barcodes) {
-      if (barcode.rawValue != null) {
-        final String rawValue = barcode.rawValue!;
-        // Check if the QR code is a valid TOTP URI
-        if (rawValue.startsWith('otpauth://')) {
-          _isProcessing = true;
-          // Stop the camera immediately to prevent multiple reads
-          controller.stop();
+      if (!mounted) return;
 
+      if (result.type == ResultType.Barcode) {
+        final rawValue = result.rawContent;
+        if (rawValue.toLowerCase().startsWith('otpauth://')) {
           _processUri(rawValue);
-          break;
+        } else {
+          _showError('Invalid QR Code: Not an authenticator URI');
         }
+      } else if (result.type == ResultType.Cancelled) {
+        // User cancelled, maybe just stay on screen or pop?
+        // Usually popping is expected if they pressed back in the scanner
+        Navigator.of(context).pop();
+      } else if (result.type == ResultType.Error) {
+        _showError('Scan error: ${result.rawContent}');
+      }
+    } catch (e) {
+      _showError('Failed to start scanner: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _hasScanned = true;
+        });
       }
     }
   }
 
   /// Parses the 'otpauth://' URI to extract account details.
-  /// Expected format: otpauth://totp/Issuer:Account?secret=SECRET&issuer=Issuer
   void _processUri(String uriString) {
     try {
       final Uri uri = Uri.parse(uriString);
@@ -53,27 +74,25 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
       Provider.of<AccountProvider>(context, listen: false)
           .addAccountObject(account)
           .then((success) {
-            if (mounted) {
-              if (success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Added account: ${account.name}')),
-                );
-                Navigator.of(context).pop(); // Return to previous screen (Home)
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Account already exists: ${account.name}'),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
-                // Optionally pop or let user scan another
-                Navigator.of(context).pop();
-              }
-            }
-          })
-          .catchError((e) {
-            _showError('Failed to add account: $e');
-          });
+        if (mounted) {
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Added account: ${account.name}')),
+            );
+            Navigator.of(context).pop(); // Return to previous screen (Home)
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Account already exists: ${account.name}'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+            Navigator.of(context).pop();
+          }
+        }
+      }).catchError((e) {
+        _showError('Failed to add account: $e');
+      });
     } catch (e) {
       _showError('Invalid QR Code: $e');
     }
@@ -84,30 +103,27 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
-    setState(() {
-      _isProcessing = false;
-    });
-    // Restart scanning if an error occurred
-    controller.start();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scan QR Code'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.flash_on),
-            onPressed: () => controller.toggleTorch(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.flip_camera_ios),
-            onPressed: () => controller.switchCamera(),
-          ),
-        ],
+      appBar: AppBar(title: const Text('Scan QR Code')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.qr_code, size: 80, color: Colors.grey),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: _startScan,
+              icon: const Icon(Icons.camera_alt),
+              label: const Text('Start Scanning'),
+            ),
+          ],
+        ),
       ),
-      body: MobileScanner(controller: controller, onDetect: _handleBarcode),
     );
   }
 }
+
