@@ -37,7 +37,7 @@ android {
         // Local auth requires minSdkVersion 28(Android 9 Pie, released at August 6, 2018). See:
         // https://github.com/flutter/packages/tree/local_auth-v3.0.0/packages/local_auth/local_auth#android-theme
         // https://en.wikipedia.org/wiki/Android_version_history
-        minSdk = 36
+        minSdk = 28
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
