@@ -38,14 +38,14 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
-      if (_tabController.index == 0 && _lastCloudBackupTime == null) {
+      if (_tabController.index == 1 && _lastCloudBackupTime == null) {
         _fetchLastCloudBackupTime();
       }
     });
 
-    // Auto fetch if we start on the first tab
+    // Auto fetch if we start on the second tab
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_tabController.index == 0) _fetchLastCloudBackupTime();
+      if (_tabController.index == 1) _fetchLastCloudBackupTime();
     });
   }
 
@@ -394,9 +394,9 @@ class _ImportExportScreenState extends State<ImportExportScreen>
           controller: _tabController,
 
           tabs: const [
-            Tab(text: 'WebDAV Cloud', icon: Icon(Icons.cloud)),
-
             Tab(text: 'Local File', icon: Icon(Icons.folder)),
+
+            Tab(text: 'WebDAV Cloud', icon: Icon(Icons.cloud)),
           ],
         ),
 
@@ -411,7 +411,21 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
       body: TabBarView(
         controller: _tabController,
+
         children: [
+          // Local Tab
+          _buildActionView(
+            icon: Icons.sd_storage,
+            title: 'Local Storage',
+            desc: 'Save backups to your device or import from local files.',
+            btn1Text: 'Export to File',
+            btn1Icon: Icons.upload_file,
+            btn1Action: _handleLocalExport,
+            btn2Text: 'Import from File',
+            btn2Icon: Icons.drive_folder_upload,
+            btn2Action: _handleLocalImport,
+          ),
+
           // WebDAV Tab
           Selector<AccountProvider, DateTime?>(
             selector: (_, p) => p.lastWebDavSyncTime,
@@ -451,27 +465,6 @@ class _ImportExportScreenState extends State<ImportExportScreen>
                 ),
               ),
             ),
-          ),
-
-          // Local Tab
-          _buildActionView(
-            icon: Icons.sd_storage,
-
-            title: 'Local Storage',
-
-            desc: 'Save backups to your device or import from local files.',
-
-            btn1Text: 'Export to File',
-
-            btn1Icon: Icons.upload_file,
-
-            btn1Action: _handleLocalExport,
-
-            btn2Text: 'Import from File',
-
-            btn2Icon: Icons.drive_folder_upload,
-
-            btn2Action: _handleLocalImport,
           ),
         ],
       ),

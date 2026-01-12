@@ -16,7 +16,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "net.liujiacai.flauth"
-    compileSdk = 36 // flutter.compileSdkVersion
+    compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -33,7 +33,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "net.liujiacai.flauth"
         // Local auth requires minSdkVersion 28(Android 9 Pie, released at August 6, 2018). See:
         // https://github.com/flutter/packages/tree/local_auth-v3.0.0/packages/local_auth/local_auth#android-theme
