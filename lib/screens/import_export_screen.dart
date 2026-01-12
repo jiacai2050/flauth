@@ -416,78 +416,49 @@ class _ImportExportScreenState extends State<ImportExportScreen>
           // Local Tab
           _buildActionView(
             icon: Icons.sd_storage,
-
             title: 'Local Storage',
-
             desc: 'Save backups to your device or import from local files.',
-
             btn1Text: 'Export to File',
-
             btn1Icon: Icons.upload_file,
-
             btn1Action: _handleLocalExport,
-
             btn2Text: 'Import from File',
-
             btn2Icon: Icons.drive_folder_upload,
-
             btn2Action: _handleLocalImport,
           ),
 
           // WebDAV Tab
           Selector<AccountProvider, DateTime?>(
             selector: (_, p) => p.lastWebDavSyncTime,
-
             builder: (context, lastSync, _) => _buildActionView(
               icon: Icons.cloud_sync,
-
               title: 'WebDAV Cloud',
-
               desc:
                   'Sync backups with your private cloud (Nextcloud, InfiniCloud etc).',
-
               btn1Text: 'Upload to Cloud',
-
               btn1Icon: Icons.cloud_upload,
-
               btn1Action: _handleWebDavUpload,
-
               btn2Text: 'Restore from Cloud',
-
               btn2Icon: Icons.cloud_download,
-
               btn2Action: _handleWebDavDownload,
-
               extra: Padding(
                 padding: const EdgeInsets.only(top: 24),
-
                 child: Wrap(
                   alignment: WrapAlignment.center,
-
                   spacing: 12,
-
                   runSpacing: 8,
-
                   children: [
                     if (_lastCloudBackupTime != null)
                       _buildTimeBadge(
                         context,
-
                         Icons.cloud_done_outlined,
-
                         'Cloud',
-
                         _lastCloudBackupTime!,
                       ),
-
                     if (lastSync != null)
                       _buildTimeBadge(
                         context,
-
                         Icons.sync_alt_outlined,
-
                         'Synced',
-
                         DateFormat.yMMMd().add_Hms().format(lastSync),
                       ),
                   ],
