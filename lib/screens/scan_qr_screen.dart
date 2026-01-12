@@ -141,7 +141,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
             const Icon(Icons.qr_code, size: 80, color: Colors.grey),
             const SizedBox(height: 24),
             FilledButton.icon(
-              onPressed: _startScan,
+              onPressed: _isScanning ? null : _startScan,
               icon: const Icon(Icons.camera_alt),
               label: const Text('Start Scanning'),
             ),
