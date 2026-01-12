@@ -38,14 +38,14 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
-      if (_tabController.index == 0 && _lastCloudBackupTime == null) {
+      if (_tabController.index == 1 && _lastCloudBackupTime == null) {
         _fetchLastCloudBackupTime();
       }
     });
 
-    // Auto fetch if we start on the first tab
+    // Auto fetch if we start on the second tab
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_tabController.index == 0) _fetchLastCloudBackupTime();
+      if (_tabController.index == 1) _fetchLastCloudBackupTime();
     });
   }
 
@@ -394,16 +394,18 @@ class _ImportExportScreenState extends State<ImportExportScreen>
           controller: _tabController,
 
           tabs: const [
-            Tab(text: 'WebDAV Cloud', icon: Icon(Icons.cloud)),
-
             Tab(text: 'Local File', icon: Icon(Icons.folder)),
+
+            Tab(text: 'WebDAV Cloud', icon: Icon(Icons.cloud)),
           ],
         ),
 
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
+
             onPressed: _openWebDavConfig,
+
             tooltip: 'WebDAV Settings',
           ),
         ],
@@ -411,48 +413,8 @@ class _ImportExportScreenState extends State<ImportExportScreen>
 
       body: TabBarView(
         controller: _tabController,
-        children: [
-          // WebDAV Tab
-          Selector<AccountProvider, DateTime?>(
-            selector: (_, p) => p.lastWebDavSyncTime,
-            builder: (context, lastSync, _) => _buildActionView(
-              icon: Icons.cloud_sync,
-              title: 'WebDAV Cloud',
-              desc:
-                  'Sync backups with your private cloud (Nextcloud, InfiniCloud etc).',
-              btn1Text: 'Upload to Cloud',
-              btn1Icon: Icons.cloud_upload,
-              btn1Action: _handleWebDavUpload,
-              btn2Text: 'Restore from Cloud',
-              btn2Icon: Icons.cloud_download,
-              btn2Action: _handleWebDavDownload,
-              extra: Padding(
-                padding: const EdgeInsets.only(top: 24),
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 12,
-                  runSpacing: 8,
-                  children: [
-                    if (_lastCloudBackupTime != null)
-                      _buildTimeBadge(
-                        context,
-                        Icons.cloud_done_outlined,
-                        'Cloud',
-                        _lastCloudBackupTime!,
-                      ),
-                    if (lastSync != null)
-                      _buildTimeBadge(
-                        context,
-                        Icons.sync_alt_outlined,
-                        'Synced',
-                        DateFormat.yMMMd().add_Hms().format(lastSync),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
 
+        children: [
           // Local Tab
           _buildActionView(
             icon: Icons.sd_storage,
@@ -472,6 +434,68 @@ class _ImportExportScreenState extends State<ImportExportScreen>
             btn2Icon: Icons.drive_folder_upload,
 
             btn2Action: _handleLocalImport,
+          ),
+
+          // WebDAV Tab
+          Selector<AccountProvider, DateTime?>(
+            selector: (_, p) => p.lastWebDavSyncTime,
+
+            builder: (context, lastSync, _) => _buildActionView(
+              icon: Icons.cloud_sync,
+
+              title: 'WebDAV Cloud',
+
+              desc:
+                  'Sync backups with your private cloud (Nextcloud, InfiniCloud etc).',
+
+              btn1Text: 'Upload to Cloud',
+
+              btn1Icon: Icons.cloud_upload,
+
+              btn1Action: _handleWebDavUpload,
+
+              btn2Text: 'Restore from Cloud',
+
+              btn2Icon: Icons.cloud_download,
+
+              btn2Action: _handleWebDavDownload,
+
+              extra: Padding(
+                padding: const EdgeInsets.only(top: 24),
+
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+
+                  spacing: 12,
+
+                  runSpacing: 8,
+
+                  children: [
+                    if (_lastCloudBackupTime != null)
+                      _buildTimeBadge(
+                        context,
+
+                        Icons.cloud_done_outlined,
+
+                        'Cloud',
+
+                        _lastCloudBackupTime!,
+                      ),
+
+                    if (lastSync != null)
+                      _buildTimeBadge(
+                        context,
+
+                        Icons.sync_alt_outlined,
+
+                        'Synced',
+
+                        DateFormat.yMMMd().add_Hms().format(lastSync),
+                      ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
