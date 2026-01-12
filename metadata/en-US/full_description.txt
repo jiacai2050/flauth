@@ -1,0 +1,10 @@
+<p>Flauth is a privacy-first, fully open-source TOTP authenticator for Android, macOS, Windows, and Linux. It provides a simple and lightweight solution for managing your 2FA (Two-Factor Authentication) tokens.</p>
+
+<p>Features:</p>
+
+<ul>
+<li><strong>100% Open Source</strong>: Transparent and trustworthy code.</li>
+<li><strong>Flexible Backups</strong>: Local text file export/import and WebDAV sync.</li>
+<li><strong>Privacy &amp; Security</strong>: Secrets are encrypted and stored in the device&#39;s secure element (Android Keystore).</li>
+<li><strong>Modern UI</strong>: Built with Material 3, supporting adaptive light and dark modes.</li>
+</ul>

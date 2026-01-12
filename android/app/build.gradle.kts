@@ -43,6 +43,15 @@ android {
         versionName = flutter.versionName
     }
 
+    // Required by F-Droid, otherwise the build on CI will fail with:
+    // ERROR Found extra signing block 'Dependency metadata'
+    dependenciesInfo {
+        // Disables dependency metadata when building APKs.
+        includeInApk = false
+        // Disables dependency metadata when building Android App Bundles.
+        includeInBundle = false
+    }
+
     signingConfigs {
         create("release") {
             keyAlias = keystoreProperties["keyAlias"] as String?

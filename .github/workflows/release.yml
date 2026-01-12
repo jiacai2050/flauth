@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to build (e.g. v0.2.0). Leave empty to use tag name.'
+        description: "Version to build (e.g. v0.2.0). Leave empty to use tag name."
         required: false
-        default: ''
+        default: ""
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
+      - "docs/**"
+      - "**.md"
   push:
     tags:
       - "v*"
@@ -61,6 +61,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
+          flutter-version: "3.38.6"
           cache: true
 
       - name: Install dependencies (Linux)
@@ -131,12 +132,22 @@ jobs:
             ${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }}
             flauth-android-*-${{ env.VERSION }}.apk
 
+      - name: Define release files
+        shell: bash
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          if [[ "${{ matrix.target }}" == "apk-split" ]]; then
+             echo "FILES_TO_UPLOAD=flauth-android-*-${{ env.VERSION }}.apk" >> $GITHUB_ENV
+          elif [[ "${{ matrix.target }}" == "apk-universal" ]]; then
+             echo "FILES_TO_UPLOAD=flauth-android-universal-${{ env.VERSION }}.apk" >> $GITHUB_ENV
+          else
+             echo "FILES_TO_UPLOAD=${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }}" >> $GITHUB_ENV
+          fi
+
       - name: Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: |
-            ${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }}
-            flauth-android-*-${{ env.VERSION }}.apk
+          files: ${{ env.FILES_TO_UPLOAD }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
