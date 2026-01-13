@@ -19,4 +19,10 @@ gen:
 perf:
 	flutter run --profile -d mac
 
-.PHONY: fmt lint test fix gen perf
+serve:
+	mkdocs serve
+
+build-docs:
+	mkdocs build --site-dir build/website
+
+.PHONY: fmt lint test fix gen perf serve build-docs

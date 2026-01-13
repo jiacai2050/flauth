@@ -8,6 +8,8 @@
 
 > Flauth 是一款隐私优先、完全开源的 TOTP 身份验证器，支持 Android、macOS、Windows 和 Linux。
 
+**[在线文档与工具](https://jiacai2050.github.io/flauth/)**
+
 它为管理您的 2FA（双重身份验证）令牌提供了一个简洁轻量的解决方案。
 
 ## 🌟 为什么选择 Flauth？
@@ -27,9 +29,9 @@
 ## 📸 截图预览
 
 <div align="center">
-    <img src="metadata/android/en-US/images/phoneScreenshots/1.png" alt="Account List" width="200"/>
-    <img src="metadata/android/en-US/images/phoneScreenshots/2.png" alt="WebDAV Backup" width="200"/>
-    <img src="metadata/android/en-US/images/phoneScreenshots/3.png" alt="Security Settings" width="200"/>
+    <img src="metadata/en-US/images/phoneScreenshots/1.png" alt="Account List" width="200"/>
+    <img src="metadata/en-US/images/phoneScreenshots/2.png" alt="WebDAV Backup" width="200"/>
+    <img src="metadata/en-US/images/phoneScreenshots/3.png" alt="Security Settings" width="200"/>
 </div>
 
 ## 📥 从其他应用导入
@@ -37,7 +39,7 @@
 得益于对标准 `otpauth://` URI 的支持，迁移到 Flauth 非常简单：
 
 - **[从 Aegis 导入](./docs/import_aegis_zh.md)**：分步指南，教您如何从 Aegis Authenticator 迁移所有账号。
-- **手动迁移**：对于其他应用，请将其账号导出为**纯文本格式的 `otpauth://` URI 列表**（每行一个）。将该文件保存为 `.flauth` 后缀，然后使用“本地文件”导入功能。
+- **手动迁移**：对于其他应用，请将其账号导出为**纯文本格式的 `otpauth://` URI 列表**（每行一个）。将该文件保存为 `.flauth` 后缀，然后使用“本地文件”导入功能。如果您只有密钥，可以使用我们的 **[TOTP URI 生成器](https://jiacai2050.github.io/flauth/tools/uri-generator/)** 来生成二维码或 URI 列表。
   ```text
   otpauth://totp/GitHub:user?secret=ABC...&issuer=GitHub
   otpauth://totp/Google:user@gmail.com?secret=XYZ...&issuer=Google

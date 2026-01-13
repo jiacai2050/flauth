@@ -1,0 +1,76 @@
+site_name: Flauth
+site_description: A privacy-first, fully open-source TOTP authenticator.
+site_url: https://jiacai2050.github.io/flauth/
+repo_url: https://github.com/jiacai2050/flauth
+repo_name: jiacai2050/flauth
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  logo: https://raw.githubusercontent.com/jiacai2050/flauth/main/assets/app_icon.svg
+  favicon: https://raw.githubusercontent.com/jiacai2050/flauth/main/web/favicon.png
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/jiacai2050/flauth
+    - icon: fontawesome/solid/globe
+      link: https://liujiacai.net
+
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: index.md
+  - User Guide:
+    - Backup & Restore: backup.md
+    - Security: auth.md
+    - Import from Aegis: import_aegis.md
+  - Developer:
+    - Android Signing: android-sign.md
+    - Performance: perf.md
+  - Tools:
+    - URI Generator: tools/uri-generator.md
+  - Chinese (中文):
+    - 备份与恢复: backup_zh.md
+    - 安全机制: auth_zh.md
+    - 从 Aegis 导入: import_aegis_zh.md
+    - 性能优化: perf_zh.md
+    - 安卓签名: android-sign_zh.md
