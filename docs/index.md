@@ -9,6 +9,7 @@
 It provides a simple and lightweight solution for managing your 2FA (Two-Factor Authentication) tokens.
 
 [:material-download: Download Latest Release](https://github.com/jiacai2050/flauth/releases){ .md-button .md-button--primary }
+[:simple-fdroid: F-Droid](https://f-droid.org/en/packages/net.liujiacai.flauth/){ .md-button }
 [:material-github: View on GitHub](https://github.com/jiacai2050/flauth){ .md-button }
 
 ---
@@ -35,7 +36,10 @@ It provides a simple and lightweight solution for managing your 2FA (Two-Factor 
 
 ## ⬇️ Download
 
-You can find the latest pre-compiled binaries for all supported platforms (Android APK, macOS, Linux, and Windows) on the **[GitHub Releases](https://github.com/jiacai2050/flauth/releases)** page.
+You can download Flauth from the following sources:
+
+- **[F-Droid](https://f-droid.org/en/packages/net.liujiacai.flauth/)**: The privacy-respecting FOSS Android app store.
+- **[GitHub Releases](https://github.com/jiacai2050/flauth/releases)**: Pre-compiled binaries for all supported platforms (Android APK, macOS, Linux, and Windows).
 
 ## 🛡️ Permissions
 

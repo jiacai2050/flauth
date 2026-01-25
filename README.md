@@ -48,7 +48,10 @@ Migrating to Flauth is easy thanks to its support for standard `otpauth://` URIs
 
 ## ⬇️ Download
 
-You can find the latest pre-compiled binaries for all supported platforms (Android APK, macOS, Linux, and Windows) on the **[GitHub Releases](https://github.com/jiacai2050/flauth/releases)** page.
+You can download Flauth from the following sources:
+
+- **[F-Droid](https://f-droid.org/en/packages/net.liujiacai.flauth/)**: The privacy-respecting FOSS Android app store.
+- **[GitHub Releases](https://github.com/jiacai2050/flauth/releases)**: Pre-compiled binaries for all supported platforms (Android APK, macOS, Linux, and Windows).
 
 ### 💡 Which Android APK should I download?
 - **arm64-v8a**: **(Recommended)** For most modern Android phones (64-bit).

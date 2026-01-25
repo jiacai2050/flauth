@@ -45,9 +45,12 @@
   otpauth://totp/Google:user@gmail.com?secret=XYZ...&issuer=Google
   ```
 
-## ⬇️ 下载安装
+## ⬇️ Download / 下载安装
 
-您可以在 **[GitHub Releases](https://github.com/jiacai2050/flauth/releases)** 页面找到所有支持平台（Android APK, macOS, Linux, Windows）的最新预编译安装包。
+您可以通过以下渠道下载 Flauth：
+
+- **[F-Droid](https://f-droid.org/en/packages/net.liujiacai.flauth/)**：隐私优先的开源 Android 应用商店。
+- **[GitHub Releases](https://github.com/jiacai2050/flauth/releases)**：所有支持平台（Android APK, macOS, Linux, Windows）的最新预编译安装包。
 
 ### 💡 我该下载哪个 Android 安装包？
 - **arm64-v8a**：**（推荐）** 适用于近几年生产的绝大多数现代 64 位手机。
