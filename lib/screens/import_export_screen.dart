@@ -541,7 +541,7 @@ class _ImportExportScreenState extends State<ImportExportScreen>
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.grey),
             ),
-            if (extra != null) extra,
+            ?extra,
             const SizedBox(height: 48),
 
             FilledButton.icon(
