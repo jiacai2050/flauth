@@ -42,7 +42,7 @@ String _formatError(Object error) {
 String _usage() {
   return '''
 Usage:
-  dart run cli/main.dart [filter]
+  flauth-cli [filter]
 
 Environment variables:
   FLAUTH_BACKUP_FILE       Backup file path

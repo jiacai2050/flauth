@@ -5,8 +5,8 @@ on:
   pull_request:
     branches: ["main"]
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
+      - "docs/**"
+      - "**.md"
 
 permissions:
   contents: read
@@ -38,7 +38,7 @@ jobs:
 
       - name: Read version
         run: |
-          version=$(awk '/^version:/{print $2}' pubspec.yaml | tr '+' '-')
+          version=$(awk '/^version:/{print $2}' pubspec.yaml | cut -f1 -d'+')
           echo "VERSION=v$version" >> "$GITHUB_ENV"
         shell: bash
 
