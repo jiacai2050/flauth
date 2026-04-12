@@ -56,7 +56,7 @@ Google  bob@gmail.com      654321
 
 - `Backup file is required via FLAUTH_BACKUP_FILE.`
 - `Encrypted backup requires FLAUTH_BACKUP_PASSWORD.`
-- `Backup file does not exist`
+- `Backup file does not exist.`
 - `No valid accounts found in backup file.`
 
 ## 说明
