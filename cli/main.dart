@@ -36,6 +36,9 @@ String _formatError(Object error) {
     return '${error.message} (${error.path})';
   }
 
+  if (error is FormatException) {
+    return error.message;
+  }
   return error.toString().replaceFirst('Exception: ', '');
 }
 
