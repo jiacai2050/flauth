@@ -1,0 +1,63 @@
+name: Build CLI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ["main"]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+
+permissions:
+  contents: read
+
+jobs:
+  build-cli:
+    name: Build CLI (${{ matrix.label }}-${{ runner.arch }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux
+            extension: ""
+          - os: macos-latest
+            label: macos
+            extension: ""
+          - os: windows-latest
+            label: windows
+            extension: ".exe"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        run: |
+          version=$(awk '/^version:/{print $2}' pubspec.yaml | tr '+' '-')
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+        shell: bash
+
+      - name: Build CLI executable
+        run: |
+          mkdir -p build
+          dart compile exe cli/main.dart -o build/flauth-cli-${{ steps.version.outputs.value }}-${{ matrix.label }}-${{ runner.arch }}${{ matrix.extension }}
+        shell: bash
+
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: flauth-cli-${{ steps.version.outputs.value }}-${{ matrix.label }}-${{ runner.arch }}${{ matrix.extension }}
+          path: build/flauth-cli-${{ steps.version.outputs.value }}-${{ matrix.label }}-${{ runner.arch }}${{ matrix.extension }}
+          if-no-files-found: error
