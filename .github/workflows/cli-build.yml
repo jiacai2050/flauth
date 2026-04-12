@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build-cli:
-    name: Build CLI (${{ matrix.label }}-${{ runner.arch }})
+    name: Build CLI (${{ matrix.label }}-${{ matrix.arch }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -21,12 +21,15 @@ jobs:
         include:
           - os: ubuntu-latest
             label: linux
+            arch: x64
             extension: ""
           - os: macos-latest
             label: macos
+            arch: arm64
             extension: ""
           - os: windows-latest
             label: windows
+            arch: x64
             extension: ".exe"
 
     steps:
@@ -34,10 +37,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Read version
-        id: version
         run: |
           version=$(awk '/^version:/{print $2}' pubspec.yaml | tr '+' '-')
-          echo "value=$version" >> "$GITHUB_OUTPUT"
+          echo "VERSION=v$version" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Set filename
+        run: |
+          echo "OUTFILE=flauth-cli-${{ env.VERSION }}-${{ matrix.label }}-${{ matrix.arch }}${{ matrix.extension }}" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Set up Flutter
@@ -52,12 +59,12 @@ jobs:
       - name: Build CLI executable
         run: |
           mkdir -p build
-          dart compile exe cli/main.dart -o build/flauth-cli-${{ steps.version.outputs.value }}-${{ matrix.label }}-${{ runner.arch }}${{ matrix.extension }}
+          dart compile exe cli/main.dart -o build/${{ env.OUTFILE }}
         shell: bash
 
       - name: Upload CLI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: flauth-cli-${{ steps.version.outputs.value }}-${{ matrix.label }}-${{ runner.arch }}${{ matrix.extension }}
-          path: build/flauth-cli-${{ steps.version.outputs.value }}-${{ matrix.label }}-${{ runner.arch }}${{ matrix.extension }}
+          name: ${{ env.OUTFILE }}
+          path: build/${{ env.OUTFILE }}
           if-no-files-found: error
