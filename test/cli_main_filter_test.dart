@@ -22,7 +22,10 @@ void main() {
       ];
 
       expect(
-        filterAccounts(accounts, 'git').map((account) => account.issuer).toList(),
+        filterAccounts(
+          accounts,
+          'git',
+        ).map((account) => account.issuer).toList(),
         <String>['GitHub'],
       );
       expect(
