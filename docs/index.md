@@ -4,9 +4,7 @@
 <img src="https://raw.githubusercontent.com/jiacai2050/flauth/main/assets/app_icon.svg" alt="Flauth Logo" width="100"/>
 </div>
 
-> **Flauth** is a privacy-first, fully open-source TOTP authenticator for Android, macOS, Windows, and Linux.
-
-It provides a simple and lightweight solution for managing your 2FA (Two-Factor Authentication) tokens.
+> **Flauth** is a privacy-first, fully open-source TOTP authenticator. It offers both a GUI app (Android, macOS, Windows, Linux) and a lightweight CLI for viewing tokens directly in your terminal.
 
 [:material-download: Download Latest Release](https://github.com/jiacai2050/flauth/releases){ .md-button .md-button--primary }
 [:simple-fdroid: F-Droid](https://f-droid.org/en/packages/net.liujiacai.flauth/){ .md-button }

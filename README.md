@@ -6,11 +6,9 @@
 <img src="assets/app_icon.svg" alt="Flauth Logo" width="100"/>
 </div>
 
-> Flauth is a privacy-first, fully open-source TOTP authenticator for Android, macOS, Windows, and Linux.
+> Flauth is a privacy-first, fully open-source TOTP authenticator. It offers both a GUI app (Android, macOS, Windows, Linux) and a lightweight CLI for viewing tokens directly in your terminal.
 
 **[Documentation & Tools](https://jiacai2050.github.io/flauth/)**
-
-It provides a simple and lightweight solution for managing your 2FA (Two-Factor Authentication) tokens.
 
 ## 🌟 Why Flauth?
 

@@ -6,11 +6,9 @@
 <img src="assets/app_icon.svg" alt="Flauth Logo" width="100"/>
 </div>
 
-> Flauth 是一款隐私优先、完全开源的 TOTP 身份验证器，支持 Android、macOS、Windows 和 Linux。
+> Flauth 是一款隐私优先、完全开源的 TOTP 身份验证器，支持 GUI 应用（Android、macOS、Windows、Linux）和轻量级命令行工具，可直接在终端中查看令牌。
 
 **[在线文档与工具](https://jiacai2050.github.io/flauth/)**
-
-它为管理您的 2FA（双重身份验证）令牌提供了一个简洁轻量的解决方案。
 
 ## 🌟 为什么选择 Flauth？
 
@@ -60,6 +58,41 @@
 
 ### ⚡️ 中国用户下载加速
 如果您在从 GitHub 下载时遇到速度较慢的问题，可以使用 [gh-proxy](https://gh-proxy.com/) 等代理服务来加速下载。
+
+## ⌨️ 命令行工具
+
+Flauth 同时提供命令行工具 `flauth-cli`，无需 GUI 即可在终端中查看 TOTP 令牌。
+
+预编译的 Linux、macOS、Windows 二进制文件可在 [GitHub Releases](https://github.com/jiacai2050/flauth/releases) 页面下载。
+
+### 快速安装
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jiacai2050/flauth/main/docs/install.sh | sh
+```
+
+中国用户加速：
+```bash
+curl -fsSL https://raw.githubusercontent.com/jiacai2050/flauth/main/docs/install.sh | sh -s -- --china
+```
+
+运行 `install.sh --help` 查看更多选项（如 `--version`、`--prefix`）。
+
+### 使用方法
+
+```bash
+# 设置备份文件路径
+export FLAUTH_BACKUP_FILE=/path/to/backup.flauth
+
+# 显示所有令牌
+flauth-cli
+
+# 按关键词过滤
+flauth-cli github
+
+# 查看帮助
+flauth-cli --help
+```
 
 ## 🛠️ 开发指南
 
