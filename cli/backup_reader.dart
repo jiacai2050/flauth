@@ -53,9 +53,9 @@ String resolveBackupFilePath({Map<String, String>? environment}) {
   );
 }
 
-Future<BackupReadResult> readBackupAccounts(
-  {Map<String, String>? environment}
-) async {
+Future<BackupReadResult> readBackupAccounts({
+  Map<String, String>? environment,
+}) async {
   final Map<String, String> env = environment ?? Platform.environment;
   final String backupFilePath = resolveBackupFilePath(environment: env);
 

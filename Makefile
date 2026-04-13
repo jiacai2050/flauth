@@ -1,10 +1,10 @@
 
 
 fmt:
-	dart format --set-exit-if-changed lib test
+	dart format --set-exit-if-changed lib test cli
 
 fix:
-	dart format lib test
+	dart format lib test cli
 
 lint:
 	flutter analyze
