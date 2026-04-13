@@ -23,7 +23,7 @@ permissions:
   contents: write
 
 env:
-  FLUTTER_VERSION: "3.38.6"
+  FLUTTER_VERSION: "3.41.0"
 
 jobs:
   build-app:
