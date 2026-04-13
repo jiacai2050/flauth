@@ -23,7 +23,7 @@ permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  build-app:
     strategy:
       fail-fast: false
       matrix:
@@ -123,8 +123,7 @@ jobs:
           mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk flauth-android-arm64-v8a-${{ env.VERSION }}.apk
           mv build/app/outputs/flutter-apk/app-x86_64-release.apk flauth-android-x86_64-${{ env.VERSION }}.apk
 
-      - name: Upload
-        if: "!startsWith(github.ref, 'refs/tags/')"
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
@@ -132,22 +131,86 @@ jobs:
             ${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }}
             flauth-android-*-${{ env.VERSION }}.apk
 
-      - name: Define release files
+  build-cli:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux
+            arch: x64
+            extension: ""
+          - os: macos-latest
+            label: macos
+            arch: arm64
+            extension: ""
+          - os: windows-latest
+            label: windows
+            arch: x64
+            extension: ".exe"
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Set env(version)
         shell: bash
-        if: startsWith(github.ref, 'refs/tags/')
         run: |
-          if [[ "${{ matrix.target }}" == "apk-split" ]]; then
-             echo "FILES_TO_UPLOAD=flauth-android-*-${{ env.VERSION }}.apk" >> $GITHUB_ENV
-          elif [[ "${{ matrix.target }}" == "apk-universal" ]]; then
-             echo "FILES_TO_UPLOAD=flauth-android-universal-${{ env.VERSION }}.apk" >> $GITHUB_ENV
+          if [ "${{ github.event.inputs.version }}" != "" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           else
-             echo "FILES_TO_UPLOAD=${{ matrix.artifact_name }}-${{ env.VERSION }}${{ matrix.asset_extension }}" >> $GITHUB_ENV
+            version=$(awk '/^version:/{print $2}' pubspec.yaml | cut -f1 -d'+')
+            echo "VERSION=v$version" >> $GITHUB_ENV
           fi
+
+      - name: Set filename
+        shell: bash
+        run: |
+          echo "OUTFILE=flauth-cli-${{ env.VERSION }}-${{ matrix.label }}-${{ matrix.arch }}${{ matrix.extension }}" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: flutter pub get
+        shell: bash
+
+      - name: Build CLI executable
+        shell: bash
+        run: |
+          mkdir -p build
+          dart compile exe cli/main.dart -DVERSION=${{ env.VERSION }} -o build/${{ env.OUTFILE }}
+
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.OUTFILE }}
+          path: build/${{ env.OUTFILE }}
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build-app, build-cli]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: List release files
+        run: find release-assets -type f
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ${{ env.FILES_TO_UPLOAD }}
+          files: release-assets/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

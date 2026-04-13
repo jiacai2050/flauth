@@ -4,7 +4,21 @@ import 'account_filter.dart';
 import 'backup_reader.dart';
 import 'totp_printer.dart';
 
+const String version = String.fromEnvironment('VERSION', defaultValue: 'dev');
+
 Future<void> main(List<String> arguments) async {
+  String cliName = Platform.script.pathSegments.last;
+
+  if (arguments.contains('--help') || arguments.contains('-h')) {
+    stdout.writeln(_usage(cliName));
+    return;
+  }
+
+  if (arguments.contains('--version') || arguments.contains('-v')) {
+    stdout.writeln('$cliName $version');
+    return;
+  }
+
   try {
     final String? filter = resolveFilter(arguments);
     final BackupReadResult readResult = await readBackupAccounts();
@@ -23,7 +37,7 @@ Future<void> main(List<String> arguments) async {
     }
   } catch (error) {
     stderr.writeln('Error: ${_formatError(error)}');
-    stderr.writeln(_usage());
+    stderr.writeln(_usage(cliName));
     exitCode = 1;
   }
 }
@@ -42,10 +56,14 @@ String _formatError(Object error) {
   return error.toString().replaceFirst('Exception: ', '');
 }
 
-String _usage() {
+String _usage(String program) {
   return '''
 Usage:
-  flauth-cli [filter]
+  $program [filter]
+
+Options:
+  -h, --help               Show this help message
+  -v, --version            Show version
 
 Environment variables:
   FLAUTH_BACKUP_FILE       Backup file path
