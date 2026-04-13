@@ -7,7 +7,7 @@ import 'totp_printer.dart';
 const String version = String.fromEnvironment('VERSION', defaultValue: 'dev');
 
 Future<void> main(List<String> arguments) async {
-  String cliName = Platform.script.pathSegments.last;
+  final String cliName = Platform.script.pathSegments.last;
 
   if (arguments.contains('--help') || arguments.contains('-h')) {
     stdout.writeln(_usage(cliName));
