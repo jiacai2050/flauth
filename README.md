@@ -62,6 +62,41 @@ You can download Flauth from the following sources:
 ### ⚡️ For Users in China (Download Acceleration)
 If you encounter slow download speeds from GitHub, you can use the [gh-proxy](https://gh-proxy.com/) service to accelerate the download.
 
+## ⌨️ CLI
+
+For a lightweight experience, Flauth also provides a command-line tool to view TOTP tokens directly in your terminal — no GUI needed.
+
+Pre-compiled binaries for Linux, macOS, and Windows are available on the [GitHub Releases](https://github.com/jiacai2050/flauth/releases) page.
+
+### Quick Install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jiacai2050/flauth/main/docs/install.sh | sh
+```
+
+For users in China:
+```bash
+curl -fsSL https://raw.githubusercontent.com/jiacai2050/flauth/main/docs/install.sh | sh -s -- --china
+```
+
+Run `install.sh --help` for more options (e.g. `--version`, `--prefix`).
+
+### Usage
+
+```bash
+# Set the backup file path
+export FLAUTH_BACKUP_FILE=/path/to/backup.flauth
+
+# Show all tokens
+flauth-cli
+
+# Filter by keyword
+flauth-cli github
+
+# Show help
+flauth-cli --help
+```
+
 ## 🛠️ Development
 
 ### Prerequisites
