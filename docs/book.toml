@@ -1,0 +1,21 @@
+[book]
+title = "Flauth"
+description = "A privacy-first, fully open-source TOTP authenticator."
+authors = ["jiacai2050"]
+language = "en"
+src = "src"
+
+[build]
+build-dir = "book"
+
+[output.html]
+site-url = "/flauth/"
+git-repo-url = "https://github.com/jiacai2050/flauth"
+edit-url-template = "https://github.com/jiacai2050/flauth/edit/main/docs/{path}"
+
+[output.html.search]
+enable = true
+
+[output.html.print]
+enable = true    # include support for printable output
+page-break = true # insert page-break after each chapter

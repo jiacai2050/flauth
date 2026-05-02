@@ -6,9 +6,7 @@
 
 > **Flauth** is a privacy-first, fully open-source TOTP authenticator. It offers both a GUI app (Android, macOS, Windows, Linux) and a lightweight CLI for viewing tokens directly in your terminal.
 
-[:material-download: Download Latest Release](https://github.com/jiacai2050/flauth/releases){ .md-button .md-button--primary }
-[:simple-fdroid: F-Droid](https://f-droid.org/en/packages/net.liujiacai.flauth/){ .md-button }
-[:material-github: View on GitHub](https://github.com/jiacai2050/flauth){ .md-button }
+[Download Latest Release](https://github.com/jiacai2050/flauth/releases) | [F-Droid](https://f-droid.org/en/packages/net.liujiacai.flauth/) | [GitHub](https://github.com/jiacai2050/flauth)
 
 ---
 

@@ -14,12 +14,12 @@
 
 - **100% Open Source**: Transparent and trustable code. Your secrets never leave your device unless you choose to sync them.
 - **Flexible Backups**:
-  - **Security Logic**: Detailed [backup and restore mechanisms](./docs/backup.md).
+  - **Security Logic**: Detailed [backup and restore mechanisms](https://jiacai2050.github.io/flauth/backup).
   - **Local Backup**: Export/Import accounts as standard text files using system file pickers.
   - **WebDAV Sync**: Seamlessly sync your data with your private cloud (Nextcloud, Nutstore, etc.) using a robust single-file sync approach with custom path support.
 - **Privacy & Security**:
-  - **Security Architecture**: Detailed [security implementation and authentication strategies](./docs/auth.md).
-  - **Performance Design**: Detailed [high-frequency UI update optimizations](./docs/perf.md).
+  - **Security Architecture**: Detailed [security implementation and authentication strategies](https://jiacai2050.github.io/flauth/auth).
+  - **Performance Design**: Detailed [high-frequency UI update optimizations](https://jiacai2050.github.io/flauth/perf).
   - **Encrypted Storage**: Secrets are encrypted and stored in the device's secure element (Keychain on iOS/macOS, Keystore on Android).
   - **Granular Storage**: Implements "One Key Per Account" architecture for maximum reliability and scalability.
 - **Modern UI**: Focused on simplicity. Built with Material 3, supporting adaptive light and dark modes.
@@ -37,8 +37,8 @@
 
 Migrating to Flauth is easy thanks to its support for standard `otpauth://` URIs:
 
-- **[Importing from Aegis](./docs/import_aegis.md)**: A step-by-step guide to migrate all your accounts from Aegis Authenticator.
-- **Manual Migration**: For other apps, export your accounts as a **plain text list of `otpauth://` URIs** (one per line). Save this file with a `.flauth` extension, then use the **Local File** import feature. If you have plain secret keys, you can use our **[TOTP URI Generator](https://jiacai2050.github.io/flauth/tools/uri-generator/)** to create the QR codes or URI lists.
+- **[Importing from Aegis](https://jiacai2050.github.io/flauth/import_aegis)**: A step-by-step guide to migrate all your accounts from Aegis Authenticator.
+- **Manual Migration**: For other apps, export your accounts as a **plain text list of `otpauth://` URIs** (one per line). Save this file with a `.flauth` extension, then use the **Local File** import feature. If you have plain secret keys, you can use our **[TOTP URI Generator](https://jiacai2050.github.io/flauth/tools/uri-generator)** to create the QR codes or URI lists.
   ```text
   otpauth://totp/GitHub:user?secret=ABC...&issuer=GitHub
   otpauth://totp/Google:user@gmail.com?secret=XYZ...&issuer=Google
@@ -69,12 +69,12 @@ Pre-compiled binaries for Linux, macOS, and Windows are available on the [GitHub
 ### Quick Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jiacai2050/flauth/main/docs/install.sh | sh
+curl -fsSL https://jiacai2050.github.io/flauth/install.sh | sh
 ```
 
 For users in China:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jiacai2050/flauth/main/docs/install.sh | sh -s -- --china
+curl -fsSL https://jiacai2050.github.io/flauth/install.sh | sh -s -- --china
 ```
 
 Run `install.sh --help` for more options (e.g. `--version`, `--prefix`).
@@ -140,7 +140,7 @@ flutter test           # Run unit tests
 ```
 
 ### 🔑 Android Signing
-For details on how to configure app signing for production, see the [Android Signing Guide](docs/android-sign.md).
+For details on how to configure app signing for production, see the [Android Signing Guide](https://jiacai2050.github.io/flauth/android-sign).
 
 ## 🏗️ Platform Specifics
 

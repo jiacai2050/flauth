@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'docs/**'
-      - 'mkdocs.yml'
   workflow_dispatch:
 
 permissions:
@@ -24,28 +23,19 @@ jobs:
         id: pages
         uses: actions/configure-pages@v3
 
-      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
-
-      - uses: actions/cache@v4
+      - name: Setup mdBook
+        uses: peaceiris/actions-mdbook@v2
         with:
-          key: mkdocs-material-${{ env.cache_id }}
-          path: .cache
-          restore-keys: |
-            mkdocs-material-
-
-      - name: Install MkDocs Material
-        run: |
-          pip install mkdocs
-          pip install mkdocs-material
+          mdbook-version: 'latest'
 
       - name: Build and Deploy
         run: |
           make build-docs
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
-          path: ./build/website
+          path: ./docs/book
 
   # Deployment job
   deploy:
@@ -57,4 +47,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

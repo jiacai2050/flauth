@@ -2,17 +2,17 @@
 
 This tool allows you to generate a standard `otpauth://` URI and QR code for your 2FA accounts manually. This is useful if you have a plain secret key and want to import it into Flauth (or other authenticators) via QR code.
 
-!!! warning "Security Note"
-    This generator runs entirely in your browser. No data is sent to any server. However, please ensure you are in a safe environment when handling secret keys.
+> **⚠️ Security Note**
+> This generator runs entirely in your browser. No data is sent to any server. However, please ensure you are in a safe environment when handling secret keys.
 
 <style>
   .tool-form {
     max-width: 600px;
     margin: 20px 0;
     padding: 20px;
-    border: 1px solid var(--md-default-fg-color--lightest);
+    border: 1px solid #ddd;
     border-radius: 4px;
-    background: var(--md-code-bg-color);
+    background: #f5f5f5;
   }
   .tool-form label {
     display: block;
@@ -25,8 +25,8 @@ This tool allows you to generate a standard `otpauth://` URI and QR code for you
     margin-bottom: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    background: var(--md-default-bg-color);
-    color: var(--md-default-fg-color);
+    background: #fff;
+    color: #333;
   }
   .tool-result {
     margin-top: 20px;
@@ -41,7 +41,7 @@ This tool allows you to generate a standard `otpauth://` URI and QR code for you
     word-break: break-all;
     font-family: monospace;
     padding: 10px;
-    background: var(--md-default-fg-color--lightest);
+    background: #eee;
     border-radius: 4px;
   }
 </style>
@@ -63,8 +63,8 @@ This tool allows you to generate a standard `otpauth://` URI and QR code for you
   </div>
 </div>
 
-!!! info "How to Import into Flauth"
-    If you have multiple accounts to add, you can collect these URIs into a plain text file (one per line), save it with a `.flauth` extension, and use the **Local File** import feature in Flauth.
+> **ℹ️ How to Import into Flauth**
+> If you have multiple accounts to add, you can collect these URIs into a plain text file (one per line), save it with a `.flauth` extension, and use the **Local File** import feature in Flauth.
 
 ---
 

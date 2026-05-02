@@ -20,10 +20,10 @@ perf:
 	flutter run --profile -d mac
 
 serve:
-	mkdocs serve
+	cd docs && mdbook serve
 
 build-docs:
-	mkdocs build --site-dir build/website
+	cd docs && mdbook build
 
 build-cli:
 	mkdir -p build
