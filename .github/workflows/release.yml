@@ -62,6 +62,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - uses: subosito/flutter-action@v2
+        id: flutter-action
         with:
           channel: "stable"
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -75,6 +76,9 @@ jobs:
 
       - name: Install dependencies (Flutter)
         run: flutter pub get
+
+      - name: Remove build id
+        run: sed -i -e 's/-Wl,/-Wl,--build-id=none,/' ${{ steps.flutter-action.outputs.PUB-CACHE-PATH }}/hosted/pub.dev/jni-*/src/CMakeLists.txt
 
       - name: Set env(version)
         shell: bash
