@@ -158,10 +158,7 @@ class _SpeedDialFab extends StatefulWidget {
   final VoidCallback onScanQr;
   final VoidCallback onManualEntry;
 
-  const _SpeedDialFab({
-    required this.onScanQr,
-    required this.onManualEntry,
-  });
+  const _SpeedDialFab({required this.onScanQr, required this.onManualEntry});
 
   @override
   State<_SpeedDialFab> createState() => _SpeedDialFabState();
