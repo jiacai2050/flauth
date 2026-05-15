@@ -5,6 +5,7 @@ import '../providers/auth_provider.dart';
 import '../models/account.dart';
 import '../widgets/account_tile.dart';
 import 'scan_qr_screen.dart';
+import 'manual_entry_screen.dart';
 import 'import_export_screen.dart';
 import 'about_screen.dart';
 import 'security_screen.dart';
@@ -111,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ).textTheme.titleLarge?.copyWith(color: Colors.grey),
                   ),
                   const SizedBox(height: 8),
-                  const Text('Tap the button below to scan a QR code'),
+                  const Text('Tap + to add an account'),
                 ],
               ),
             );
@@ -137,15 +138,148 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
+      floatingActionButton: _SpeedDialFab(
+        onScanQr: () {
           Navigator.of(
             context,
           ).push(MaterialPageRoute(builder: (context) => const ScanQrScreen()));
         },
-        icon: const Icon(Icons.qr_code_scanner),
-        label: const Text('Scan'),
+        onManualEntry: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const ManualEntryScreen()),
+          );
+        },
       ),
+    );
+  }
+}
+
+class _SpeedDialFab extends StatefulWidget {
+  final VoidCallback onScanQr;
+  final VoidCallback onManualEntry;
+
+  const _SpeedDialFab({required this.onScanQr, required this.onManualEntry});
+
+  @override
+  State<_SpeedDialFab> createState() => _SpeedDialFabState();
+}
+
+class _SpeedDialFabState extends State<_SpeedDialFab>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _rotationAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+    _rotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 0.125,
+    ).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    if (_controller.isCompleted) {
+      _controller.reverse();
+    } else {
+      _controller.forward();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return IgnorePointer(
+              ignoring: _controller.isDismissed,
+              child: child,
+            );
+          },
+          child: SizeTransition(
+            sizeFactor: _controller,
+            axisAlignment: 1.0,
+            child: FadeTransition(
+              opacity: _controller,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _buildMiniAction(
+                      label: 'Manual Entry',
+                      icon: Icons.keyboard,
+                      onPressed: () {
+                        _controller.reverse();
+                        widget.onManualEntry();
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildMiniAction(
+                      label: 'Scan QR',
+                      icon: Icons.qr_code_scanner,
+                      onPressed: () {
+                        _controller.reverse();
+                        widget.onScanQr();
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        FloatingActionButton(
+          heroTag: 'main_fab',
+          onPressed: _toggle,
+          child: RotationTransition(
+            turns: _rotationAnimation,
+            child: const Icon(Icons.add),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMiniAction({
+    required String label,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Material(
+          elevation: 2,
+          borderRadius: BorderRadius.circular(4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Text(label, style: const TextStyle(fontSize: 12)),
+          ),
+        ),
+        const SizedBox(width: 8),
+        FloatingActionButton.small(
+          heroTag: label,
+          onPressed: onPressed,
+          child: Icon(icon),
+        ),
+      ],
     );
   }
 }
