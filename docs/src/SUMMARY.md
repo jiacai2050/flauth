@@ -4,14 +4,15 @@
 
 # User Guide
 
-- [Backup & Restore](backup.md)
-- [Security](auth.md)
-- [Import from Aegis](import_aegis.md)
+- [Backup & Restore](guide/backup.md)
+- [Security](guide/auth.md)
+- [Import from Aegis](guide/import_aegis.md)
 
 # Developer
 
-- [Android Signing](android-sign.md)
-- [Performance](perf.md)
+- [Android Signing](dev/android-sign.md)
+- [Release](dev/release.md)
+- [Performance](dev/perf.md)
 
 # Tools
 
