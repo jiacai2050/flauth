@@ -154,9 +154,9 @@ class _HomeScreenState extends State<HomeScreen>
       floatingActionButton: _SpeedDialFab(
         controller: _fabController,
         onScanQr: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const ScanQrScreen()),
-          );
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (context) => const ScanQrScreen()));
         },
         onManualEntry: () {
           Navigator.of(context).push(
@@ -189,46 +189,49 @@ class _SpeedDialFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, child) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            if (controller.value > 0) ...[
-              _buildMiniAction(
-                label: 'Manual Entry',
-                icon: Icons.keyboard,
-                onPressed: () {
-                  controller.reverse();
-                  onManualEntry();
-                },
-                progress: controller.value,
-              ),
-              const SizedBox(height: 12),
-              _buildMiniAction(
-                label: 'Scan QR',
-                icon: Icons.qr_code_scanner,
-                onPressed: () {
-                  controller.reverse();
-                  onScanQr();
-                },
-                progress: controller.value,
-              ),
-              const SizedBox(height: 12),
-            ],
-            FloatingActionButton(
-              onPressed: _toggle,
-              child: AnimatedRotation(
-                turns: controller.value * 0.125,
-                duration: const Duration(milliseconds: 250),
-                child: const Icon(Icons.add),
-              ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        SizeTransition(
+          sizeFactor: controller,
+          axisAlignment: 1.0,
+          child: FadeTransition(
+            opacity: controller,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                _buildMiniAction(
+                  label: 'Manual Entry',
+                  icon: Icons.keyboard,
+                  onPressed: () {
+                    controller.reverse();
+                    onManualEntry();
+                  },
+                ),
+                const SizedBox(height: 12),
+                _buildMiniAction(
+                  label: 'Scan QR',
+                  icon: Icons.qr_code_scanner,
+                  onPressed: () {
+                    controller.reverse();
+                    onScanQr();
+                  },
+                ),
+                const SizedBox(height: 12),
+              ],
             ),
-          ],
-        );
-      },
+          ),
+        ),
+        FloatingActionButton(
+          onPressed: _toggle,
+          child: RotationTransition(
+            turns: Tween<double>(begin: 0.0, end: 0.125).animate(controller),
+            child: const Icon(Icons.add),
+          ),
+        ),
+      ],
     );
   }
 
@@ -236,33 +239,25 @@ class _SpeedDialFab extends StatelessWidget {
     required String label,
     required IconData icon,
     required VoidCallback onPressed,
-    required double progress,
   }) {
-    return Opacity(
-      opacity: progress,
-      child: Transform.scale(
-        scale: progress,
-        alignment: Alignment.bottomRight,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Material(
-              elevation: 2,
-              borderRadius: BorderRadius.circular(4),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Text(label, style: const TextStyle(fontSize: 12)),
-              ),
-            ),
-            const SizedBox(width: 8),
-            FloatingActionButton.small(
-              heroTag: label,
-              onPressed: onPressed,
-              child: Icon(icon),
-            ),
-          ],
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Material(
+          elevation: 2,
+          borderRadius: BorderRadius.circular(4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Text(label, style: const TextStyle(fontSize: 12)),
+          ),
         ),
-      ),
+        const SizedBox(width: 8),
+        FloatingActionButton.small(
+          heroTag: label,
+          onPressed: onPressed,
+          child: Icon(icon),
+        ),
+      ],
     );
   }
 }

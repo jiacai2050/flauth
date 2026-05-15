@@ -49,9 +49,9 @@ class _ManualEntryScreenState extends State<ManualEntryScreen> {
     setState(() => _isSubmitting = false);
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Added account: $name')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Added account: $name')));
       Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -109,6 +109,8 @@ class _ManualEntryScreenState extends State<ManualEntryScreen> {
                 ),
                 textInputAction: TextInputAction.done,
                 textCapitalization: TextCapitalization.characters,
+                autocorrect: false,
+                enableSuggestions: false,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Secret key is required';
