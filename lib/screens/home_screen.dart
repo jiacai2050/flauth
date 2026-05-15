@@ -168,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 }
 
-class _SpeedDialFab extends StatelessWidget {
+class _SpeedDialFab extends StatefulWidget {
   final AnimationController controller;
   final VoidCallback onScanQr;
   final VoidCallback onManualEntry;
@@ -179,11 +179,27 @@ class _SpeedDialFab extends StatelessWidget {
     required this.onManualEntry,
   });
 
+  @override
+  State<_SpeedDialFab> createState() => _SpeedDialFabState();
+}
+
+class _SpeedDialFabState extends State<_SpeedDialFab> {
+  late final Animation<double> _rotationAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _rotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 0.125,
+    ).animate(widget.controller);
+  }
+
   void _toggle() {
-    if (controller.isCompleted) {
-      controller.reverse();
+    if (widget.controller.isCompleted) {
+      widget.controller.reverse();
     } else {
-      controller.forward();
+      widget.controller.forward();
     }
   }
 
@@ -193,11 +209,11 @@ class _SpeedDialFab extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        SizeTransition(
-          sizeFactor: controller,
-          axisAlignment: 1.0,
+        ScaleTransition(
+          scale: widget.controller,
+          alignment: Alignment.bottomRight,
           child: FadeTransition(
-            opacity: controller,
+            opacity: widget.controller,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -206,8 +222,8 @@ class _SpeedDialFab extends StatelessWidget {
                   label: 'Manual Entry',
                   icon: Icons.keyboard,
                   onPressed: () {
-                    controller.reverse();
-                    onManualEntry();
+                    widget.controller.reverse();
+                    widget.onManualEntry();
                   },
                 ),
                 const SizedBox(height: 12),
@@ -215,8 +231,8 @@ class _SpeedDialFab extends StatelessWidget {
                   label: 'Scan QR',
                   icon: Icons.qr_code_scanner,
                   onPressed: () {
-                    controller.reverse();
-                    onScanQr();
+                    widget.controller.reverse();
+                    widget.onScanQr();
                   },
                 ),
                 const SizedBox(height: 12),
@@ -227,7 +243,7 @@ class _SpeedDialFab extends StatelessWidget {
         FloatingActionButton(
           onPressed: _toggle,
           child: RotationTransition(
-            turns: Tween<double>(begin: 0.0, end: 0.125).animate(controller),
+            turns: _rotationAnimation,
             child: const Icon(Icons.add),
           ),
         ),
