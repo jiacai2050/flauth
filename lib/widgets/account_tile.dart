@@ -110,7 +110,9 @@ class _AccountTileState extends State<AccountTile> {
                             : widget.account.name,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: _isCodeVisible ? Colors.grey[600] : null,
+                          color: _isCodeVisible
+                              ? Theme.of(context).colorScheme.onSurfaceVariant
+                              : null,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -129,7 +131,7 @@ class _AccountTileState extends State<AccountTile> {
                       child: Text(
                         widget.account.name,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
