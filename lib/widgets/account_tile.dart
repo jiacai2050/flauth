@@ -77,18 +77,19 @@ class _AccountTileState extends State<AccountTile> {
             setState(() {
               _isCodeVisible = !_isCodeVisible;
             });
-
-            if (_isCodeVisible) {
-              Clipboard.setData(ClipboardData(text: code));
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Code revealed and copied to clipboard'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            }
           },
+          onLongPress: _isCodeVisible
+              ? () {
+                  Clipboard.setData(ClipboardData(text: code));
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Code copied to clipboard'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+                }
+              : null,
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16.0,
