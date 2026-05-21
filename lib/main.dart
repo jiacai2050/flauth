@@ -16,6 +16,8 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  static final navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     const snackBarTheme = SnackBarThemeData(
@@ -36,6 +38,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Flauth',
+        navigatorKey: navigatorKey,
         // debugShowCheckedModeBanner: false,
         // Define a consistent theme for the app, supporting both light and dark modes.
         theme: ThemeData(
@@ -100,6 +103,13 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
+        if (auth.status == AuthStatus.unauthenticated) {
+          // Pop all routes so the lock screen is visible even if user was on a sub-page
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            MyApp.navigatorKey.currentState?.popUntil((route) => route.isFirst);
+          });
+        }
+
         if (auth.status == AuthStatus.unknown) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
