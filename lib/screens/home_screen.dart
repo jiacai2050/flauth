@@ -120,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return ReorderableListView.builder(
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 80),
             itemCount: accounts.length,
-            onReorder: (oldIndex, newIndex) {
+            onReorderItem: (oldIndex, newIndex) {
               Provider.of<AccountProvider>(
                 context,
                 listen: false,
@@ -212,7 +212,7 @@ class _SpeedDialFabState extends State<_SpeedDialFab>
           },
           child: SizeTransition(
             sizeFactor: _controller,
-            axisAlignment: 1.0,
+            alignment: Alignment.bottomCenter,
             child: FadeTransition(
               opacity: _controller,
               child: Align(

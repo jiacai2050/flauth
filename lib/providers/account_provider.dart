@@ -97,9 +97,6 @@ class AccountProvider with ChangeNotifier {
 
   /// Reorders accounts in the list and updates storage.
   Future<void> reorderAccounts(int oldIndex, int newIndex) async {
-    if (oldIndex < newIndex) {
-      newIndex -= 1;
-    }
     // Create a new list copy to maintain immutability and trigger UI updates.
     final List<Account> newList = List.from(_accounts);
     final Account item = newList.removeAt(oldIndex);
