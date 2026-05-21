@@ -106,7 +106,10 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
         if (auth.status == AuthStatus.unauthenticated) {
           // Pop all routes so the lock screen is visible even if user was on a sub-page
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            MyApp.navigatorKey.currentState?.popUntil((route) => route.isFirst);
+            final navigator = MyApp.navigatorKey.currentState;
+            if (navigator != null && navigator.canPop()) {
+              navigator.popUntil((route) => route.isFirst);
+            }
           });
         }
 
