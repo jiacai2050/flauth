@@ -29,4 +29,7 @@ build-cli:
 	mkdir -p build
 	dart compile exe cli/main.dart -o build/flauth-cli
 
-.PHONY: fmt lint test fix gen perf serve build-docs build-cli
+run:
+	flutter run
+
+.PHONY: fmt lint test fix gen perf serve build-docs build-cli run
